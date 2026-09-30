@@ -114,10 +114,34 @@
     ];
   }
 
+  // Ejercicios asignados por un docente
+  function assignedCases() {
+    const raw = { t: 'Parcial', s: 'Enunciado', xn: 'Publicidad', xu: 'millones de $', yn: 'Ventas', yu: 'millones de $', r: [[1, 11], [2, 16], [3, 18], [4, 19], [5, 24], [6, 25], [7, 29], [8, 28]], l: 2, a: 0.05, p: '5', sol: 0, q: ['sst', 'r2', 'zzz'] };
+    const spec = Exercises.specFromRaw(raw);
+    const ex = Exercises.fromSpec(spec);
+    const l1 = Exercises.fromSpec(Exercises.specFromRaw({ r: raw.r, l: 1 }));
+    const l3 = Exercises.fromSpec(Exercises.specFromRaw({ r: raw.r, l: 3, a: 0.01 }));
+    const bad = raw2 => { const s = Exercises.specFromRaw(raw2); return s === null || !!Exercises.fromSpec(s).error ? 1 : 0; };
+    return [
+      ['Asignado: se reconocen los datos y el nivel', spec && spec.x.length === 8 && spec.level === 2 ? 1 : 0, 1, 0],
+      ['Asignado: solo se mantienen las preguntas válidas elegidas', ex.questions.map(q => q.kind).join(','), 'sst,r2', 'x'],
+      ['Asignado: la respuesta de SST es 275,5', ex.questions[0].correct, 275.5, 4],
+      ['Asignado: r² = 0,9528', ex.questions[1].correct, 0.9528, 4],
+      ['Asignado: sin soluciones cuando se pidió ocultarlas', spec.sol ? 1 : 0, 0, 0],
+      ['Asignado: el nivel 1 tiene 8 preguntas', l1.questions.length, 8, 0],
+      ['Asignado: el nivel 3 con α = 0,01 usa el crítico de t con 0,005 por cola (3,7074)', l3.questions.find(q => q.kind === 'tcrit').correct, 3.7074, 4],
+      ['Asignado: con X constante no se arma el ejercicio', bad({ r: [[1, 2], [1, 3], [1, 5]] }), 1, 0],
+      ['Asignado: con menos de 3 pares no se arma', bad({ r: [[1, 2], [2, 3]] }), 1, 0],
+      ['Asignado: con un valor que no es número no se arma', bad({ r: [[1, 2], [2, 'x'], [3, 4]] }), 1, 0],
+      ['Asignado: con Y constante no se arma', bad({ r: [[1, 5], [2, 5], [3, 5]] }), 1, 0]
+    ];
+  }
+
   function run() {
-    return cases().concat(exerciseCases(), influenceCases()).map(c => {
-      const tol = c[4] || 0.5 * Math.pow(10, -c[3]) + 1e-12;
-      const ok = isFinite(c[1]) && Math.abs(c[1] - c[2]) <= tol;
+    return cases().concat(exerciseCases(), influenceCases(), assignedCases()).map(c => {
+      const tol = c[4] || (c[3] === 'x' ? 0 : 0.5 * Math.pow(10, -c[3]) + 1e-12);
+      const ok = c[3] === 'x' ? c[1] === c[2] : isFinite(c[1]) && Math.abs(c[1] - c[2]) <= tol;
+      if (c[3] === 'x') return { name: c[0], ok: c[1] === c[2], got: String(c[1]), expected: String(c[2]) };
       return { name: c[0], ok, got: isFinite(c[1]) ? fmt(c[1], Math.max(c[3], 4)) : String(c[1]), expected: fmt(c[2], c[3]) };
     });
   }

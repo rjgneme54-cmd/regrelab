@@ -224,6 +224,35 @@
     <div class="btn-row"><button type="button" class="btn ghost" data-close>Cerrar</button></div>
   </dialog>
 
+  <dialog id="dlg-assign" aria-labelledby="as-t">
+    <h2 id="as-t">Crear un ejercicio para tus estudiantes</h2>
+    <p class="small">Se arma con los datos cargados en «Datos». Tus estudiantes abren el enlace, calculan a mano, comprueban sus resultados y pueden copiar su resultado para entregártelo.</p>
+    <p class="small" id="as-data"></p>
+    <label class="field">Título<input id="as-title" type="text" maxlength="80" autocomplete="off"></label>
+    <label class="field">Enunciado <span class="opt">(opcional)</span><textarea id="as-statement" rows="3" maxlength="600" placeholder="Describe la situación: qué se midió, en qué contexto…"></textarea></label>
+    <fieldset class="field radios">
+      <legend>Nivel</legend>
+      <label><input type="radio" name="as-level" value="1" checked> Nivel 1 · La recta</label>
+      <label><input type="radio" name="as-level" value="2"> Nivel 2 · Variación y ajuste</label>
+      <label><input type="radio" name="as-level" value="3"> Nivel 3 · Inferencia</label>
+    </fieldset>
+    <fieldset class="field as-qs-box">
+      <legend>Qué deben calcular <span id="as-count" class="small"></span></legend>
+      <div id="as-questions"></div>
+    </fieldset>
+    <label class="field" id="as-xp-wrap" hidden>Valor de X para la predicción<input id="as-xp" type="text" inputmode="decimal" autocomplete="off"></label>
+    <label class="check"><input type="checkbox" id="as-sol" checked> Permitir que vean las respuestas y la solución paso a paso</label>
+    <p class="small">Ojo: RegreLab funciona en el navegador, así que no es un examen seguro: un estudiante con conocimientos técnicos podría ver las respuestas. Sirve para práctica y tareas.</p>
+    <div class="warn" id="as-error" hidden></div>
+    <label class="field">Enlace para tus estudiantes<input id="as-link" type="text" readonly onfocus="this.select()"></label>
+    <div class="btn-row">
+      <button type="button" class="btn primary" id="as-copy"><span class="ico" data-icon="copy"></span>Copiar enlace</button>
+      <button type="button" class="btn" id="as-native"><span class="ico" data-icon="share"></span>Compartir…</button>
+      <button type="button" class="btn" id="as-test"><span class="ico" data-icon="target"></span>Probar como estudiante</button>
+      <button type="button" class="btn ghost" data-close>Cerrar</button>
+    </div>
+  </dialog>
+
   <dialog id="dlg-paste" aria-labelledby="p-t">
     <h2 id="p-t">Pegar o escribir varios pares</h2>
     <p class="small">Pega dos columnas de Excel o Google Sheets (con o sin encabezado), o escribe un par por línea separando X e Y con un espacio, por ejemplo <strong>3 18</strong>. Si hay más de dos columnas, se usan las dos últimas.</p>
@@ -238,6 +267,7 @@
     <div class="btn-row">
       <button type="button" class="btn primary" id="share-copy"><span class="ico" data-icon="copy"></span>Copiar enlace</button>
       <button type="button" class="btn" id="share-native"><span class="ico" data-icon="share"></span>Compartir…</button>
+      <button type="button" class="btn" id="share-assign"><span class="ico" data-icon="target"></span>Crear ejercicio sin resolver…</button>
       <button type="button" class="btn" id="share-pdf"><span class="ico" data-icon="print"></span>Guardar como PDF</button>
       <button type="button" class="btn" id="share-csv"><span class="ico" data-icon="download"></span>Datos en CSV</button>
       <button type="button" class="btn ghost" data-close>Cerrar</button>

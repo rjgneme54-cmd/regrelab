@@ -836,6 +836,7 @@ const App = (function () {
       const ok = await Share.nativeShare(S, 'RegreLab: regresión lineal simple', 'Mira esta resolución de regresión y correlación en RegreLab.');
       if (ok) $('#dlg-share').close();
     });
+    $('#share-assign').addEventListener('click', () => { $('#dlg-share').close(); Practice.openCreator(); });
     $('#share-pdf').addEventListener('click', () => { $('#dlg-share').close(); printReport(); });
     $('#share-csv').addEventListener('click', () => { Share.download('regrelab-datos.csv', Share.toCSV(S)); });
 
@@ -850,7 +851,7 @@ const App = (function () {
   function init() {
     Icons.hydrate();
     Board.init({ data: () => ({ M, S: S2, L }), mount: mountCharts, toast });
-    Practice.init({ toast, copy: Share.copy, tips: applyTips, resolve: resolveExercise });
+    Practice.init({ toast, copy: Share.copy, tips: applyTips, resolve: resolveExercise, data: () => ({ M, S: S2, L }), showPractice: () => showView('practice') });
     initTheme();
     initTips();
     $('#welcome-steps').innerHTML = Content.welcome.map((w, i) =>
@@ -858,6 +859,7 @@ const App = (function () {
     bindEvents();
 
     const pm = /(?:^|[#&])p=(\d+)\.([123])/.exec(location.hash);
+    const em = /(?:^|[#&])e=([A-Za-z0-9_-]+)/.exec(location.hash);
     const shared = Share.decode(location.hash);
     let fromLink = false;
     if (shared) { S = Object.assign(blankState(), shared); fromLink = true; }
@@ -873,7 +875,10 @@ const App = (function () {
     writeForm();
     recompute();
     setLearnTab('gloss');
-    if (pm) {
+    if (em) {
+      showView('practice');
+      if (Practice.openPacked(em[1])) toast('Se abrió un ejercicio asignado por tu docente.');
+    } else if (pm) {
       showView('practice');
       Practice.open(+pm[1], +pm[2]);
       toast('Se abrió un ejercicio compartido.');

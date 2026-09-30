@@ -103,6 +103,47 @@
     return ex;
   }
 
+  // Preguntas de cada nivel (claves); el docente puede elegir un subconjunto
+  const KINDS = {
+    1: ['sx', 'sy', 'sxy', 'sxx', 'ssx', 'ssxy', 'b1', 'b0'],
+    2: ['sst', 'ssr', 'sse', 'r2', 'r', 'syx', 'ypred'],
+    3: ['syx', 'sb1', 't', 'tcrit', 'dec', 'cilo', 'cihi', 'f']
+  };
+
+  // Ejercicio armado por un docente con sus propios datos (los valores llegan de un enlace: se valida todo)
+  function specFromRaw(raw) {
+    if (!raw || !Array.isArray(raw.r)) return null;
+    const txt = (v, max) => String(v === undefined || v === null ? '' : v).slice(0, max).trim();
+    const num = v => Number(String(v).replace(',', '.'));
+    const rows = raw.r.slice(0, 40).map(p => [num(p && p[0]), num(p && p[1])]);
+    if (rows.length < 3 || rows.some(p => !isFinite(p[0]) || !isFinite(p[1]))) return null;
+    const level = [1, 2, 3].indexOf(+raw.l) >= 0 ? +raw.l : 1;
+    const alpha = +raw.a > 0 && +raw.a < 0.5 ? +raw.a : 0.05;
+    const only = Array.isArray(raw.q) ? raw.q.filter(k => KINDS[level].indexOf(k) >= 0) : [];
+    const xp = raw.p === undefined || raw.p === null || raw.p === '' ? null : num(raw.p);
+    return {
+      title: txt(raw.t, 80), statement: txt(raw.s, 600), xName: txt(raw.xn, 40) || 'X', xUnit: txt(raw.xu, 30), yName: txt(raw.yn, 40) || 'Y', yUnit: txt(raw.yu, 30),
+      x: rows.map(p => p[0]), y: rows.map(p => p[1]), level, alpha, xp: xp !== null && isFinite(xp) ? xp : null,
+      sol: !(raw.sol === 0 || raw.sol === false), only: only.length ? only : null
+    };
+  }
+
+  function fromSpec(spec) {
+    const x = spec.x, y = spec.y;
+    const alpha = spec.alpha || 0.05;
+    const mean = x.reduce((s, v) => s + v, 0) / x.length;
+    const xp = spec.xp !== null && spec.xp !== undefined && isFinite(spec.xp) ? spec.xp : Math.round(mean * 100) / 100;
+    const m = Stats.analyze(x, y, { alpha, conf: 1 - alpha, tail: 'two', xPred: xp });
+    if (!(m.ssx > 0) || !(m.sst > 0) || m.sse < 1e-9) return { error: 'Con estos datos no se puede armar el ejercicio: X debe tomar al menos dos valores distintos, Y no puede ser constante y los puntos no pueden estar exactamente sobre una recta.' };
+    const ex = {
+      seed: null, custom: true, spec, level: spec.level, title: spec.title || 'Ejercicio de regresión', intro: spec.statement || '',
+      xName: spec.xName, xUnit: spec.xUnit, yName: spec.yName, yUnit: spec.yUnit, x, y, n: x.length, alpha, conf: 1 - alpha, xp, m
+    };
+    ex.given = givenFor(ex);
+    ex.questions = questionsFor(ex).filter(q => !spec.only || spec.only.indexOf(q.kind) >= 0);
+    return ex;
+  }
+
   function givenFor(ex) {
     const m = ex.m;
     if (ex.level === 2) return [
@@ -132,5 +173,5 @@
     return Math.abs(val - question.correct) <= question.tol ? 'ok' : 'bad';
   }
 
-  return { SCENARIOS, LEVELS, generate, grade, rng };
+  return { SCENARIOS, LEVELS, KINDS, generate, grade, rng, specFromRaw, fromSpec };
 });

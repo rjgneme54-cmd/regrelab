@@ -125,5 +125,11 @@ const Share = (function () {
     return out;
   }
 
-  return { encode, decode, link, copy, nativeShare, toCSV, download, parseTable };
+  // Objetos cualquiera dentro de la URL (ejercicios asignados)
+  function pack(obj) { return toB64Url(JSON.stringify(obj)); }
+  function unpack(s) {
+    try { return JSON.parse(fromB64Url(s)); } catch (e) { return null; }
+  }
+
+  return { encode, decode, link, copy, nativeShare, toCSV, download, parseTable, pack, unpack };
 })();
