@@ -256,10 +256,26 @@ const Steps = (function () {
       else msg = 'D es mayor que 3: hay indicios claros de <strong>autocorrelación negativa</strong>.';
       return msg;
     };
+    function normalityStep() {
+      const g1 = M.skew, g2 = M.exKurt;
+      const notes = [];
+      if (M.n < 10) notes.push('Con solo ' + M.n + ' datos los gráficos son <strong>orientativos</strong>: pocos puntos siempre se ven algo irregulares.');
+      if (Math.abs(g1) > 1) notes.push('La asimetría es marcada (g₁ = ' + n(g1, 2) + '): los residuos se reparten de forma muy despareja hacia un lado.');
+      if (Math.abs(g2) > 2) notes.push('La curtosis se aleja bastante de 0 (g₂ = ' + n(g2, 2) + '): hay colas más pesadas o más livianas que las de una campana.');
+      if (!notes.length || (notes.length === 1 && M.n < 10)) notes.push('No se ven desvíos marcados respecto de una distribución normal.');
+      return '<p>El supuesto <strong>N</strong> pide que los errores sigan una distribución normal. Se revisa con dos gráficos de los residuos.</p>' +
+        '<div class="chart-pair">' + chartBox('hist', 'Histograma de los residuos') + chartBox('qq', 'Gráfico de probabilidad normal') + '</div>' +
+        '<div class="fx"><div class="fx-row"><span class="fx-cap">Cómo leerlos</span><div><p><strong>Histograma:</strong> debería parecerse a la curva azul (una campana centrada en 0).</p>' +
+        '<p><strong>Probabilidad normal:</strong> si los errores son normales, los puntos caen cerca de la recta; una curva en «S» o puntos que se alejan en los extremos indican que no lo son.</p></div></div>' +
+        '<div class="fx-row"><span class="fx-cap">Medidas</span>' + D(R`g_1=${tex(g1, 3)}\qquad g_2=${tex(g2, 3)}`) + '</div></div>' +
+        '<p class="small">g₁ mide la <strong>asimetría</strong> (0 = simétrica) y g₂ la <strong>curtosis</strong> respecto de la normal (0 = igual que una campana). Son referencias, no una prueba formal.</p>' +
+        interp('<p>' + notes.join(' ') + '</p><p class="small">La regresión tolera apartamientos leves de la normalidad, sobre todo con muestras grandes; los desvíos fuertes afectan sobre todo a las pruebas y los intervalos.</p>');
+    }
+
     const lineItems = [
       ['L', 'Linealidad', 'En el gráfico de residuos, los puntos deben repartirse al azar alrededor de 0, sin forma de curva (U o ∩).'],
       ['I', 'Independencia de los errores', 'No debe haber patrones ni rachas en el orden de los residuos. Se verifica con Durbin-Watson si los datos están ordenados en el tiempo.'],
-      ['N', 'Normalidad de los errores', 'Los residuos deberían distribuirse de forma aproximadamente simétrica y con forma de campana (histograma o gráfico de probabilidad normal).'],
+      ['N', 'Normalidad de los errores', 'Los residuos deberían ser aproximadamente simétricos y con forma de campana: mira el histograma y el gráfico de probabilidad normal del paso anterior.'],
       ['E', 'Igualdad de varianzas (homocedasticidad)', 'La dispersión vertical de los residuos debe ser parecida para todos los valores de X: sin «embudo» que se abre o se cierra.']
     ];
     cards.push({
@@ -270,6 +286,7 @@ const Steps = (function () {
           D(R`\sum e=${tex(sumE)}\qquad \sum e^2=${tex(M.sse)}=SSE`) + '<p>Los residuos suman 0 y la suma de sus cuadrados es SSE: <strong>verificado</strong>.</p>'),
         step('Graficar los residuos frente a X', chartBox('residuals', 'Residuos frente a X') +
           (bigRes.length ? warn('<p>Hay residuos grandes (más de 2 S_YX en valor absoluto) en las filas: <strong>' + bigRes.map(i => i + 1).join(', ') + '</strong>. Revisa si son errores de carga o casos especiales.</p>') : '')),
+        step('Revisar la normalidad de los errores', normalityStep()),
         step('Lista de verificación LINE',
           '<p>Mira el gráfico de residuos y marca lo que se cumple:</p><ul class="line-list">' + lineItems.map(it =>
             '<li><label><input type="checkbox"> <span><strong>' + it[0] + ' — ' + it[1] + '.</strong> ' + it[2] + '</span></label></li>').join('') + '</ul>'),

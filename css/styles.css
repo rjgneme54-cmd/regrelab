@@ -767,3 +767,13 @@ dialog#dlg-qr[open] { display: flex; flex-direction: column; align-items: center
 dialog#dlg-qr .btn-row { margin-top: .4rem; }
 @media (max-width: 899px) { .qr-kick, .qr-link { font-size: 1rem; } }
 @media print { dialog#dlg-qr[open] { display: flex; } .qr-img { width: 12cm; } dialog#dlg-qr .btn-row { display: none; } }
+
+/* ---------- gráficos de normalidad ---------- */
+.chart-pair { display: grid; grid-template-columns: minmax(0, 1fr); gap: .6rem; margin: .5rem 0; }
+.chart-pair .chartbox { margin: 0; }
+@media (min-width: 900px) { .chart-pair { grid-template-columns: 1fr 1fr; } .chart-pair .chart-canvas { height: 320px; } }
+.b-body .chart-pair .chart-canvas { height: max(220px, min(40vh, 460px)); }
+@media (max-width: 899px) {
+  .rm-scale { font-size: 1rem; }
+  .rm-scale span:not(:first-child):not(:last-child):not(:nth-child(6)) { display: none; }
+}

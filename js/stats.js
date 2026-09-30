@@ -95,6 +95,59 @@
   }
   const fUpper = (a, d1, d2) => upperQuantile(f => fSf(f, d1, d2), a, 1);
 
+  // ---------- distribución normal ----------
+  // Gamma incompleta regularizada (serie y fracción continua): base de la normal
+  function gammaSeries(a, x) {
+    let ap = a, sum = 1 / a, del = sum;
+    for (let i = 0; i < 500; i++) {
+      ap += 1; del *= x / ap; sum += del;
+      if (Math.abs(del) < Math.abs(sum) * 1e-16) break;
+    }
+    return sum * Math.exp(-x + a * Math.log(x) - lgamma(a));
+  }
+
+  function gammaFrac(a, x) {
+    const TINY = 1e-300;
+    let b = x + 1 - a, c = 1 / TINY, d = 1 / b, h = d;
+    for (let i = 1; i <= 500; i++) {
+      const an = -i * (i - a);
+      b += 2;
+      d = an * d + b; if (Math.abs(d) < TINY) d = TINY;
+      c = b + an / c; if (Math.abs(c) < TINY) c = TINY;
+      d = 1 / d;
+      const del = d * c;
+      h *= del;
+      if (Math.abs(del - 1) < 1e-16) break;
+    }
+    return Math.exp(-x + a * Math.log(x) - lgamma(a)) * h;
+  }
+
+  const gammaQ = (a, x) => (x <= 0 ? 1 : (x < a + 1 ? 1 - gammaSeries(a, x) : gammaFrac(a, x)));
+
+  const normPdf = z => Math.exp(-0.5 * z * z) / Math.sqrt(2 * Math.PI);
+
+  function normCdf(z) {
+    if (z === 0) return 0.5;
+    const tail = 0.5 * gammaQ(0.5, z * z / 2);
+    return z < 0 ? tail : 1 - tail;
+  }
+
+  // Cuantil de la normal estándar por bisección sobre la cola inferior
+  function normInv(p) {
+    if (!(p > 0)) return -Infinity;
+    if (!(p < 1)) return Infinity;
+    if (p === 0.5) return 0;
+    const q = p < 0.5 ? p : 1 - p;
+    let lo = -40, hi = 0;
+    for (let i = 0; i < 200; i++) {
+      const mid = 0.5 * (lo + hi);
+      if (normCdf(mid) < q) lo = mid; else hi = mid;
+      if (hi - lo < 1e-14) break;
+    }
+    const z = 0.5 * (lo + hi);
+    return p < 0.5 ? z : -z;
+  }
+
   // ---------- utilidades ----------
   const sum = arr => arr.reduce((s, v) => s + v, 0);
 
@@ -102,6 +155,17 @@
     const pos = (sorted.length - 1) * q;
     const lo = Math.floor(pos), hi = Math.ceil(pos);
     return sorted[lo] + (sorted[hi] - sorted[lo]) * (pos - lo);
+  }
+
+  // Puntos del gráfico de probabilidad normal (posiciones de Blom) y recta de referencia por los cuartiles
+  function qqPoints(values) {
+    const e = values.slice().sort((a, b) => a - b);
+    const n = e.length;
+    const z = e.map((_, i) => normInv((i + 1 - 0.375) / (n + 0.25)));
+    const q1 = quantile(e, 0.25), q3 = quantile(e, 0.75);
+    const z1 = normInv(0.25), z3 = normInv(0.75);
+    const slope = q3 > q1 ? (q3 - q1) / (z3 - z1) : Math.sqrt(e.reduce((s, v) => s + v * v, 0) / Math.max(1, n - 1));
+    return { z, e, slope, intercept: q1 - slope * z1 };
   }
 
   function iqrOutliers(arr) {
@@ -180,6 +244,9 @@
     const dw = sse > 0 ? sum(e.slice(1).map((v, i) => (v - e[i]) * (v - e[i]))) / sse : NaN;
 
     const stdRes = e.map(v => (syx > 0 ? v / syx : 0));
+    const m2 = sum(e.map(v => v * v)) / n;
+    const skew = m2 > 0 ? sum(e.map(v => v * v * v)) / n / Math.pow(m2, 1.5) : NaN;
+    const exKurt = m2 > 0 ? sum(e.map(v => v * v * v * v)) / n / (m2 * m2) - 3 : NaN;
     const outliers = {
       x: iqrOutliers(x),
       y: iqrOutliers(y),
@@ -190,7 +257,7 @@
       n, df, opts: o,
       sums: { x: sx, y: sy, xy: sxy, xx: sxx, yy: syy },
       xbar, ybar, ssx, ssxy, sst, ssr, sse,
-      b0, b1, yhat, e, stdRes,
+      b0, b1, yhat, e, stdRes, skew, exKurt,
       r, r2, syx, sb1, msr, mse, F,
       sx2: ssx / (n - 1), sy2: sst / (n - 1),
       sxStd: Math.sqrt(ssx / (n - 1)), syStd: Math.sqrt(sst / (n - 1)),
@@ -207,6 +274,6 @@
 
   return {
     lgamma, betai, tSfTwo, tSf, tCdf, tPdf, tUpper, tInv,
-    fSf, fCdf, fPdf, fUpper, ttest, analyze, sum
+    fSf, fCdf, fPdf, fUpper, ttest, analyze, sum, normPdf, normCdf, normInv, qqPoints
   };
 });

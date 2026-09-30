@@ -41,10 +41,17 @@ const Charts = (function () {
     id: 'ann',
     beforeDatasetsDraw(chart, args, opts) {
       const lines = opts.lines || [];
-      if (!lines.length) return;
+      const rects = opts.rects || [];
+      if (!lines.length && !rects.length) return;
       const { ctx, chartArea: a, scales: { x, y } } = chart;
       ctx.save();
       ctx.beginPath(); ctx.rect(a.left, a.top, a.right - a.left, a.bottom - a.top); ctx.clip();
+      rects.forEach(r => {
+        const x1 = x.getPixelForValue(r.x1), x2 = x.getPixelForValue(r.x2), y1 = y.getPixelForValue(r.y1), y2 = y.getPixelForValue(r.y2);
+        ctx.fillStyle = r.fill; ctx.strokeStyle = r.stroke; ctx.lineWidth = 1.5;
+        ctx.fillRect(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1));
+        ctx.strokeRect(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1));
+      });
       lines.forEach(l => {
         ctx.beginPath();
         ctx.strokeStyle = l.color; ctx.lineWidth = l.w || 1.5;
@@ -317,6 +324,56 @@ const Charts = (function () {
         title: 'Residuos frente a X', tooltip: ptTooltip(L),
         ann: { lines, texts: [{ x: bx.max, y: 0, text: 'e = 0', color: t.text, align: 'right', base: 'bottom', dy: -3 }] },
         scales: { x: axis(t, L.x, bx), y: axis(t, 'Residuo e (' + (L.uy || 'unidades de Y') + ')', by) }
+      })
+    });
+  };
+
+  // Histograma de los residuos con la curva normal de referencia
+  draw.hist = function (canvas, M, L) {
+    const t = theme();
+    const e = M.e, n = e.length;
+    const lo = Math.min.apply(null, e), hi = Math.max.apply(null, e);
+    const k = Math.max(3, Math.min(8, Math.ceil(1 + Math.log(n) / Math.LN2)));
+    const w = (hi - lo) / k || 1;
+    const counts = new Array(k).fill(0);
+    e.forEach(v => { counts[Math.min(k - 1, Math.floor((v - lo) / w))]++; });
+    const sd = Math.sqrt(e.reduce((s, v) => s + v * v, 0) / Math.max(1, n - 1)) || 1;
+    const xa = lo - Math.max(w, sd), xb = hi + Math.max(w, sd);
+    const curve = [];
+    for (let i = 0; i <= 80; i++) {
+      const v = xa + (xb - xa) * i / 80;
+      curve.push({ x: v, y: Stats.normPdf(v / sd) / sd * n * w });
+    }
+    const peak = Math.max(Math.max.apply(null, counts), Math.max.apply(null, curve.map(p => p.y)));
+    const by = { min: 0, max: Math.ceil(peak * 1.15), step: Math.max(1, Math.ceil(peak * 1.15 / 6)) };
+    const bx = bounds(xa, xb);
+    const rects = counts.map((cnt, j) => ({ x1: lo + j * w, x2: lo + (j + 1) * w, y1: 0, y2: cnt, fill: 'rgba(31,56,100,0.32)', stroke: COL.navy }));
+    make(canvas, {
+      type: 'scatter',
+      data: { datasets: [lineDs('Curva normal con la misma dispersión', curve, COL.ssr, { borderWidth: 2.5 })] },
+      options: baseOptions(t, {
+        title: 'Histograma de los residuos', tooltip: { enabled: false },
+        ann: { rects, lines: [{ x1: 0, y1: 0, x2: 0, y2: by.max, color: t.muted, w: 1.2, dash: [5, 4] }] },
+        scales: { x: axis(t, 'Residuo e (' + (L.uy || 'unidades de Y') + ')', bx), y: axis(t, 'Frecuencia', by, { ticks: { color: t.muted, stepSize: by.step, precision: 0 } }) }
+      })
+    });
+  };
+
+  // Gráfico de probabilidad normal de los residuos
+  draw.qq = function (canvas, M, L) {
+    const t = theme();
+    const q = Stats.qqPoints(M.e);
+    const zmax = Math.max(2.2, Math.max.apply(null, q.z.map(Math.abs)) + 0.3);
+    const line = [{ x: -zmax, y: q.intercept - q.slope * zmax }, { x: zmax, y: q.intercept + q.slope * zmax }];
+    const ys = q.e.concat(line.map(p => p.y));
+    const bx = bounds(-zmax, zmax);
+    const by = bounds(Math.min.apply(null, ys), Math.max.apply(null, ys));
+    make(canvas, {
+      type: 'scatter',
+      data: { datasets: [lineDs('Recta de referencia (distribución normal)', line, COL.ssr, { borderWidth: 2 }), dataset('Residuos ordenados', q.z.map((z, i) => ({ x: z, y: q.e[i] })), COL.navy)] },
+      options: baseOptions(t, {
+        title: 'Gráfico de probabilidad normal', tooltip: ptTooltip(L),
+        scales: { x: axis(t, 'Cuantil teórico de la normal (z)', bx), y: axis(t, 'Residuo e (' + (L.uy || 'unidades de Y') + ')', by) }
       })
     });
   };

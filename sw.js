@@ -1,4 +1,4 @@
-const CACHE = 'regrelab-v7';
+const CACHE = 'regrelab-v8';
 
 const ASSETS = [
   './',

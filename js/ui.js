@@ -546,6 +546,8 @@ const App = (function () {
         '<div class="pick-info" aria-live="polite"><span class="hint">Toca un punto para ver su descomposición.</span></div>') +
       box('bars', 'SST, SSR y SSE en porcentajes', '<strong>5.5</strong> Cuánto pesa cada parte de la variación.') +
       box('residuals', 'Residuos frente a X', '<strong>5.8</strong> Si el modelo es adecuado, los puntos se reparten al azar alrededor de 0.') +
+      box('hist', 'Histograma de los residuos', '<strong>5.8</strong> Debería parecerse a una campana centrada en 0 (curva azul).') +
+      box('qq', 'Gráfico de probabilidad normal', '<strong>5.8</strong> Si los errores son normales, los puntos siguen la recta.') +
       (M.degenerateY ? '' :
         box('distT', 'Prueba t para la pendiente', '<strong>5.9</strong> Regiones de rechazo, valor crítico y estadístico t.') +
         box('distF', 'Prueba F para la pendiente', '<strong>5.10</strong> Región de rechazo de la distribución F.') +

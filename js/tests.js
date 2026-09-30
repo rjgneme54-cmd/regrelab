@@ -96,6 +96,28 @@
     ];
   }
 
+  // Distribución normal y gráfico de probabilidad normal
+  function normalCases() {
+    const rt = [-3, -1.2, 0.3, 1.96, 2.5].map(x => Math.abs(Stats.normInv(Stats.normCdf(x)) - x)).reduce((a, b) => Math.max(a, b), 0);
+    const q = Stats.qqPoints([3, -1, 0, 2, -2, 1, 5, -4]);
+    const zs = Stats.qqPoints([-3, -1, 0, 1, 3, 2, -2, 0.5]).z;
+    const sym = Stats.analyze([1, 2, 3, 4, 5], [1, 3, 2, 5, 4], { alpha: 0.05 });
+    return [
+      ['Normal: Φ(0) = 0,5', Stats.normCdf(0), 0.5, 12],
+      ['Normal: Φ(1,96) = 0,9750021', Stats.normCdf(1.96), 0.9750021, 7],
+      ['Normal: Φ(−5) = 2,8665157e-7', Stats.normCdf(-5) * 1e7, 2.8665157, 6],
+      ['Normal: z de 0,975 = 1,959964', Stats.normInv(0.975), 1.959964, 6],
+      ['Normal: z de 0,995 = 2,575829', Stats.normInv(0.995), 2.575829, 6],
+      ['Normal: z de 0,10 = −z de 0,90', Stats.normInv(0.1) + Stats.normInv(0.9), 0, 10],
+      ['Normal: ida y vuelta Φ⁻¹(Φ(x)) = x', rt, 0, 8],
+      ['Normal: densidad en 0 = 0,3989423', Stats.normPdf(0), 0.3989423, 7],
+      ['QQ: el primer valor ordenado usa la posición de Blom (1−0,375)/(8+0,25)', q.z[0], Stats.normInv(0.625 / 8.25), 12],
+      ['QQ: los z crecen y son simétricos', Math.abs(zs[0] + zs[7]) < 1e-9 && zs.every((v, i) => i === 0 || v > zs[i - 1]) ? 1 : 0, 1, 0],
+      ['QQ: la recta de referencia tiene pendiente positiva', q.slope > 0 ? 1 : 0, 1, 0],
+      ['Residuos: la suma de e³ da asimetría finita', isFinite(sym.skew) && isFinite(sym.exKurt) ? 1 : 0, 1, 0]
+    ];
+  }
+
   // Excluir puntos: dato atípico del ejemplo (X = 1…10; la fila 8 tiene Y = 20)
   function influenceCases() {
     const x = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], y = [35, 42, 48, 55, 60, 68, 73, 20, 85, 90];
@@ -166,7 +188,7 @@
   }
 
   function run() {
-    return cases().concat(exerciseCases(), influenceCases(), assignedCases(), qrCases()).map(c => {
+    return cases().concat(exerciseCases(), influenceCases(), assignedCases(), qrCases(), normalCases()).map(c => {
       const tol = c[4] || (c[3] === 'x' ? 0 : 0.5 * Math.pow(10, -c[3]) + 1e-12);
       const ok = c[3] === 'x' ? c[1] === c[2] : isFinite(c[1]) && Math.abs(c[1] - c[2]) <= tol;
       if (c[3] === 'x') return { name: c[0], ok: c[1] === c[2], got: String(c[1]), expected: String(c[2]) };
