@@ -58,12 +58,12 @@ node js/tests.js
    git add .
    git commit -m "RegreLab: versión inicial"
    git branch -M main
-   git remote add origin https://github.com/TU-USUARIO/regrelab.git
+   git remote add origin https://github.com/rjgneme54-cmd/regrelab.git
    git push -u origin main
    ```
 
 3. En GitHub: **Settings → Pages → Build and deployment → Source: «Deploy from a branch»**, elige la rama `main` y la carpeta `/ (root)`, y pulsa **Save**.
-4. Espera uno o dos minutos. La app quedará en `https://TU-USUARIO.github.io/regrelab/`.
+4. Espera uno o dos minutos. La app quedará en `https://rjgneme54-cmd.github.io/regrelab/`.
 5. Abre esa dirección: en el celular aparece «Agregar a pantalla de inicio» / «Instalar app»; en la PC, el ícono de instalar en la barra de direcciones de Chrome o Edge.
 
 Todas las rutas del proyecto son relativas, así que funciona en un subdirectorio de GitHub Pages sin cambios.
