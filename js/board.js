@@ -165,7 +165,7 @@ const Board = (function () {
   }
 
   function onKey(e) {
-    if (!live) return;
+    if (!live || document.querySelector('dialog[open]')) return;
     wake();
     if (e.altKey || e.ctrlKey || e.metaKey) return;
     const t = e.target;
@@ -182,6 +182,7 @@ const Board = (function () {
       case 't': case 'T': toggleTheme(); break;
       case 'i': case 'I': case 'g': case 'G': toggleIndex(); break;
       case 'a': case 'A': revealAll(); break;
+      case 'q': case 'Q': if (api.qr) api.qr(); break;
       case '+': case '=': setScale(0.1); break;
       case '-': case '_': setScale(-0.1); break;
       default: return;
@@ -235,6 +236,7 @@ const Board = (function () {
         if (a === 'close') close();
         if (a === 'index') toggleIndex();
         if (a === 'full') toggleFull();
+        if (a === 'qr' && api.qr) api.qr();
         if (a === 'theme') toggleTheme();
         if (a === 'bigger') setScale(0.1);
         if (a === 'smaller') setScale(-0.1);

@@ -7,6 +7,7 @@ Creada por **Prof. Neme Gastón**. Aplicación web educativa (Estadística 2) qu
 - Instalable (PWA) y con funcionamiento **sin conexión**.
 - **Modo práctica:** ejercicios con datos generados al azar en tres niveles (la recta; variación y ajuste; inferencia). El estudiante calcula a mano, la app corrige con tolerancia de redondeo, da pistas y muestra la solución paso a paso. Cada ejercicio tiene un número: el enlace «Compartir este ejercicio» (`#p=12345.2`) abre exactamente el mismo ejercicio en otro dispositivo, útil para asignarlo en clase.
 - **Ejercicio sin resolver para compartir:** el docente carga sus datos, pulsa «Crear ejercicio con mis datos» (en «Práctica», o desde «Compartir»), elige título, enunciado, nivel y qué preguntas deben calcular los estudiantes, y copia el enlace (`#e=…`). El estudiante lo abre, ve solo el enunciado, los datos y las preguntas, calcula a mano y comprueba sus resultados; con «Copiar mi resultado para entregar» obtiene un texto con su nombre, la fecha, los aciertos y sus respuestas. El docente puede desactivar las respuestas y la solución paso a paso. **Aviso:** al funcionar todo en el navegador, no es un examen seguro; sirve para práctica y tareas.
+- **Código QR** para pasar un ejercicio en el aula sin escribir direcciones: se genera sin conexión y se puede proyectar a pantalla completa o descargar como imagen. Está en el creador de ejercicios, en «Compartir» (QR del ejercicio resuelto y QR para abrir la app), en «Práctica» y en el pizarrón (tecla `Q`). Se dibuja siempre en negro sobre blanco, que es lo que mejor leen las cámaras. Si el enlace es muy largo el código queda denso (la app avisa) y a partir de unos 2.300 caracteres ya no entra: en ese caso conviene reducir la cantidad de datos.
 - **Modo pizarrón** (botón «Pizarrón» en «Resultados», o el ícono de cada sección): presentación a pantalla completa para proyectar en clase. Una diapositiva por paso, letra grande, pizarra oscura o fondo claro, y revelado progresivo en cada cálculo (primero la fórmula, luego el reemplazo y al final el resultado). Atajos: `→` / `Espacio` / `Re Pág` avanzan (también sirve un control remoto de presentaciones), `←` retrocede, `A` muestra todo el paso, `I` abre el índice, `T` cambia el tema, `+` y `-` cambian el tamaño, `F` pantalla completa, `Esc` sale. En pantallas táctiles se cambia deslizando.
 - **Excluir un punto y recalcular** (tarjeta 5.15): el estudiante marca puntos, ve la recta con y sin ellos en el mismo gráfico y compara b₁, r², la prueba t y la decisión. Señala el punto más influyente y advierte que solo se debe excluir un dato con una razón concreta. Se puede llevar el cambio a la tabla de datos.
 - **Seis ejemplos precargados** (botón «Más ejemplos»): el del apunte, pendiente negativa con prueba de cola izquierda, un valor atípico, extrapolación con serie de tiempo (Durbin-Watson), relación débil que no rechaza H₀ y una relación curva con r = 0.
@@ -17,7 +18,7 @@ Creada por **Prof. Neme Gastón**. Aplicación web educativa (Estadística 2) qu
 ```
 regrelab/
 ├── index.html          Página principal
-├── tests.html          Autoverificación del motor de cálculo y del generador de ejercicios (70 pruebas)
+├── tests.html          Autoverificación del motor de cálculo y del generador de ejercicios (79 pruebas)
 ├── manifest.json       Manifiesto PWA
 ├── sw.js               Service worker (funcionamiento sin conexión)
 ├── css/styles.css
@@ -31,12 +32,13 @@ regrelab/
 │   ├── icons.js        Íconos de línea (SVG)
 │   ├── exercises.js    Generador, corrector y ejercicios asignados del modo práctica
 │   ├── influence.js    Excluir puntos y comparar (tarjeta 5.15)
+│   ├── qr.js           Código QR (dibujo en SVG y diálogo)
 │   ├── practice.js     Pantalla del modo práctica
 │   ├── board.js        Modo pizarrón (presentación para proyectar)
 │   ├── ui.js           Interfaz, validaciones, navegación
 │   └── tests.js        Pruebas del ejemplo del apunte
 ├── icons/              Íconos de la app
-└── vendor/             Chart.js, KaTeX y tipografías Newsreader / IBM Plex (con sus licencias)
+└── vendor/             Chart.js, KaTeX, qrcode-generator y tipografías Newsreader / IBM Plex (con sus licencias)
 ```
 
 ## Probar en local
@@ -102,4 +104,4 @@ El botón **Compartir** genera un enlace con los datos y parámetros codificados
 
 ## Licencias de terceros
 
-Chart.js (MIT), KaTeX (MIT) y las tipografías Newsreader e IBM Plex (SIL Open Font License) se distribuyen dentro de `vendor/` junto con sus licencias.
+Chart.js (MIT), KaTeX (MIT), qrcode-generator (MIT) y las tipografías Newsreader e IBM Plex (SIL Open Font License) se distribuyen dentro de `vendor/` junto con sus licencias.

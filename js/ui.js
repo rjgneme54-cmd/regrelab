@@ -836,6 +836,8 @@ const App = (function () {
       const ok = await Share.nativeShare(S, 'RegreLab: regresión lineal simple', 'Mira esta resolución de regresión y correlación en RegreLab.');
       if (ok) $('#dlg-share').close();
     });
+    $('#share-qr').addEventListener('click', () => { readParams(); QR.show({ title: 'Este ejercicio en tu celular', link: Share.link(S), note: 'Abre el ejercicio resuelto, con sus datos.' }); });
+    $('#share-qr-app').addEventListener('click', () => QR.show({ title: 'Abre RegreLab', link: location.href.split('#')[0], note: 'Regresión y correlación paso a paso. Funciona también sin conexión.' }));
     $('#share-assign').addEventListener('click', () => { $('#dlg-share').close(); Practice.openCreator(); });
     $('#share-pdf').addEventListener('click', () => { $('#dlg-share').close(); printReport(); });
     $('#share-csv').addEventListener('click', () => { Share.download('regrelab-datos.csv', Share.toCSV(S)); });
@@ -850,8 +852,9 @@ const App = (function () {
 
   function init() {
     Icons.hydrate();
-    Board.init({ data: () => ({ M, S: S2, L }), mount: mountCharts, toast });
-    Practice.init({ toast, copy: Share.copy, tips: applyTips, resolve: resolveExercise, data: () => ({ M, S: S2, L }), showPractice: () => showView('practice') });
+    QR.init({ copy: Share.copy, toast });
+    Board.init({ data: () => ({ M, S: S2, L }), mount: mountCharts, toast, qr: () => { readParams(); QR.show({ title: 'Este ejercicio en tu celular', link: Share.link(S), note: 'Abre el ejercicio resuelto, con sus datos.' }); } });
+    Practice.init({ toast, copy: Share.copy, tips: applyTips, resolve: resolveExercise, qr: QR.show, data: () => ({ M, S: S2, L }), showPractice: () => showView('practice') });
     initTheme();
     initTips();
     $('#welcome-steps').innerHTML = Content.welcome.map((w, i) =>

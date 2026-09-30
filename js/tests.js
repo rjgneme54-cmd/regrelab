@@ -1,6 +1,7 @@
 (function (root, factory) {
   const isNode = typeof module === 'object' && module.exports;
-  const api = factory(isNode ? require('./stats.js') : root.Stats, isNode ? require('./exercises.js') : root.Exercises, isNode ? require('./influence.js') : root.Influence);
+  if (isNode) global.qrcode = require('../vendor/qrcode.js');
+  const api = factory(isNode ? require('./stats.js') : root.Stats, isNode ? require('./exercises.js') : root.Exercises, isNode ? require('./influence.js') : root.Influence, isNode ? require('./qr.js') : root.QR);
   if (typeof module === 'object' && module.exports) {
     module.exports = api;
     if (require.main === module) {
@@ -11,7 +12,7 @@
       process.exit(bad ? 1 : 0);
     }
   } else root.RegreTests = api;
-})(typeof self !== 'undefined' ? self : this, function (Stats, Exercises, Influence) {
+})(typeof self !== 'undefined' ? self : this, function (Stats, Exercises, Influence, QR) {
   'use strict';
 
   const X = [1, 2, 3, 4, 5, 6, 7, 8];
@@ -137,8 +138,35 @@
     ];
   }
 
+  // Código QR: estructura del símbolo y capacidad
+  function qrCases() {
+    const url = 'https://rjgneme54-cmd.github.io/regrelab/#e=' + 'A'.repeat(500);
+    const m = QR.matrix(url);
+    const finder = (r0, c0) => {
+      for (let dy = 0; dy < 7; dy++) for (let dx = 0; dx < 7; dx++) {
+        const dark = dy === 0 || dy === 6 || dx === 0 || dx === 6 || (dy >= 2 && dy <= 4 && dx >= 2 && dx <= 4);
+        if (m.rows[r0 + dy][c0 + dx] !== dark) return 0;
+      }
+      return 1;
+    };
+    let timing = 1;
+    for (let i = 8; i < m.count - 8; i++) if (m.rows[6][i] !== (i % 2 === 0) || m.rows[i][6] !== (i % 2 === 0)) timing = 0;
+    const app = QR.matrix('https://rjgneme54-cmd.github.io/regrelab/');
+    return [
+      ['QR: el tamaño coincide con la versión (17 + 4·v)', m.count === 17 + 4 * m.version ? 1 : 0, 1, 0],
+      ['QR: los tres patrones de posición están en su lugar', finder(0, 0) + finder(0, m.count - 7) + finder(m.count - 7, 0), 3, 0],
+      ['QR: el patrón de sincronización alterna claro y oscuro', timing, 1, 0],
+      ['QR: la dirección de la app entra en la versión 3', app.version, 3, 0],
+      ['QR: la misma dirección da siempre el mismo código', JSON.stringify(QR.matrix(url).rows) === JSON.stringify(m.rows) ? 1 : 0, 1, 0],
+      ['QR: 2000 caracteres caben', QR.svg('x'.repeat(2000)) ? 1 : 0, 1, 0],
+      ['QR: 3000 caracteres no caben (se avisa)', QR.svg('x'.repeat(3000)) === null ? 1 : 0, 1, 0],
+      ['QR: el texto vacío no genera código', QR.svg('') === null ? 1 : 0, 1, 0],
+      ['QR: el SVG es blanco y negro con margen', /fill="#fff"/.test(QR.svg(url).svg) && /fill="#000"/.test(QR.svg(url).svg) ? 1 : 0, 1, 0]
+    ];
+  }
+
   function run() {
-    return cases().concat(exerciseCases(), influenceCases(), assignedCases()).map(c => {
+    return cases().concat(exerciseCases(), influenceCases(), assignedCases(), qrCases()).map(c => {
       const tol = c[4] || (c[3] === 'x' ? 0 : 0.5 * Math.pow(10, -c[3]) + 1e-12);
       const ok = c[3] === 'x' ? c[1] === c[2] : isFinite(c[1]) && Math.abs(c[1] - c[2]) <= tol;
       if (c[3] === 'x') return { name: c[0], ok: c[1] === c[2], got: String(c[1]), expected: String(c[2]) };

@@ -751,3 +751,19 @@ dialog#dlg-assign textarea { font-family: var(--sans); }
 .p-assigned h3 { font-size: 1.5rem; margin-bottom: .2rem; }
 .p-name { margin: .8rem 0; max-width: 28rem; }
 @media (max-width: 899px) { .as-qs-box .small { font-size: 1rem; } }
+
+/* ---------- código QR ---------- */
+dialog#dlg-qr {
+  --card: #fdfbf5; --card-2: #efe9db; --text: #1a2036; --muted: #576078; --rule: #d9d1be; --rule-2: #b7ad96; --accent: #1f3864; --primary: #1f3864; --primary-t: #fff;
+  width: 100vw; height: 100vh; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 1rem; border: 0; border-radius: 0; box-shadow: none; background: #fff; color: #1a2036;
+}
+dialog#dlg-qr[open] { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .5rem; text-align: center; overflow-y: auto; }
+.qr-kick { margin: 0; font: 600 .85rem var(--mono); letter-spacing: .14em; text-transform: uppercase; color: #576078; }
+#qr-title { font: 600 clamp(1.5rem, 4vmin, 2.6rem)/1.15 var(--serif); margin: 0; color: #1a2036; }
+.qr-img { width: min(70vmin, 700px); max-width: 100%; margin: .3rem auto; border: 1px solid #d9d1be; }
+.qr-img svg { display: block; width: 100%; height: auto; }
+.qr-link { margin: 0; max-width: 46rem; font: 400 .85rem var(--mono); color: #576078; overflow-wrap: anywhere; }
+.qr-note { margin: 0; max-width: 40rem; font: 400 1.05rem var(--serif); color: #1a2036; }
+dialog#dlg-qr .btn-row { margin-top: .4rem; }
+@media (max-width: 899px) { .qr-kick, .qr-link { font-size: 1rem; } }
+@media print { dialog#dlg-qr[open] { display: flex; } .qr-img { width: 12cm; } dialog#dlg-qr .btn-row { display: none; } }

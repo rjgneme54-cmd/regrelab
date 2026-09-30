@@ -175,6 +175,7 @@ const Practice = (function () {
       '<div class="p-levels" role="group" aria-label="Nivel del ejercicio">' + levelButtons() + '</div>' +
       '<div class="btn-row"><button type="button" class="btn primary" data-p="new">' + Icons.svg('reset') + 'Ejercicio nuevo</button>' +
       '<button type="button" class="btn" data-p="share">' + Icons.svg('share') + 'Compartir este ejercicio</button>' +
+      '<button type="button" class="btn" data-p="qr">' + Icons.svg('qr') + 'Mostrar QR</button>' +
       '<button type="button" class="btn" data-p="create">' + Icons.svg('paste') + 'Crear ejercicio con mis datos</button></div>' +
       '<p class="small p-stats">' + (s.exercises ? 'Llevas <strong>' + s.exercises + '</strong> ejercicio' + (s.exercises === 1 ? '' : 's') + ' con <strong>' + pct + ' %</strong> de aciertos.' : 'Todavía no resolviste ningún ejercicio. ¡Anímate con el primero!') + '</p></div>';
   }
@@ -307,6 +308,7 @@ const Practice = (function () {
       paint();
       navigator.share({ title: 'Resultado: ' + P.ex.title, text }).catch(() => { /* cancelado */ });
     }
+    if (a === 'qr' && api.qr) api.qr({ title: 'Ejercicio n.º ' + P.ex.seed, link: location.href.split('#')[0] + '#p=' + P.ex.seed + '.' + P.ex.level, note: 'Escanéalo para abrir este mismo ejercicio en el celular.' });
     if (a === 'share') {
       const link = location.href.split('#')[0] + '#p=' + P.ex.seed + '.' + P.ex.level;
       api.copy(link).then(ok => api.toast(ok ? 'Enlace copiado: quien lo abra verá este mismo ejercicio.' : 'No se pudo copiar el enlace.'));
@@ -331,7 +333,7 @@ const Practice = (function () {
   function creatorRaw() {
     const c = creator;
     const q = Exercises.KINDS[c.level].filter(k => c.only[k]);
-    const raw = { t: c.title.trim(), s: c.statement.trim(), xn: c.d.L.xn, xu: c.d.L.ux || '', yn: c.d.L.yn, yu: c.d.L.uy || '', r: c.d.M.x.map((v, i) => [String(v), String(c.d.M.y[i])]),
+    const raw = { t: c.title.trim(), s: c.statement.trim(), xn: c.d.L.xn, xu: c.d.L.ux || '', yn: c.d.L.yn, yu: c.d.L.uy || '', r: c.d.M.x.map((v, i) => [v, c.d.M.y[i]]),
       l: c.level, a: c.d.S.alpha, sol: c.sol ? 1 : 0 };
     if (c.level === 2 && String(c.xp).trim() !== '') raw.p = String(c.xp).trim();
     if (q.length && q.length < Exercises.KINDS[c.level].length) raw.q = q;
@@ -355,12 +357,12 @@ const Practice = (function () {
     const count = Exercises.KINDS[c.level].filter(k => c.only[k]).length;
     $('#as-link').value = link;
     $('#as-count').textContent = count + (count === 1 ? ' pregunta' : ' preguntas');
-    $$('#as-copy, #as-test, #as-native').forEach(b => { b.disabled = count === 0; });
+    $$('#as-copy, #as-test, #as-native, #as-qr').forEach(b => { b.disabled = count === 0; });
     const spec = Exercises.specFromRaw(creatorRaw());
     const err = spec ? Exercises.fromSpec(spec).error : 'Faltan datos.';
     $('#as-error').hidden = !err;
     $('#as-error').textContent = err || '';
-    if (err) $$('#as-copy, #as-test, #as-native').forEach(b => { b.disabled = true; });
+    if (err) $$('#as-copy, #as-test, #as-native, #as-qr').forEach(b => { b.disabled = true; });
   }
 
   function openCreator() {
@@ -402,6 +404,9 @@ const Practice = (function () {
       refreshCreator();
     });
     $('#as-copy').addEventListener('click', () => api.copy($('#as-link').value).then(ok => api.toast(ok ? 'Enlace copiado: envíalo a tus estudiantes.' : 'No se pudo copiar; selecciónalo manualmente.')));
+    $('#as-qr').addEventListener('click', () => {
+      if (api.qr) api.qr({ title: creator.title.trim() || 'Ejercicio de regresión', link: $('#as-link').value, note: 'Tus estudiantes escanean este código con la cámara del celular para abrir el ejercicio.' });
+    });
     $('#as-native').hidden = !navigator.share;
     $('#as-native').addEventListener('click', () => {
       navigator.share({ title: creator.title, text: 'Ejercicio de regresión y correlación para resolver en RegreLab:', url: $('#as-link').value }).catch(() => { /* cancelado */ });
