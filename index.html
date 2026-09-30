@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>RegreLab</title>
+  <meta name="description" content="RegreLab resuelve paso a paso regresión lineal simple y correlación: fórmulas, gráficos, pruebas de hipótesis e intervalos. Funciona sin conexión.">
+  <meta name="theme-color" content="#1F3864">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="vendor/katex/katex.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Saltar al contenido</a>
+
+  <header class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#fff" opacity=".15"/><path d="M5 25 L27 8" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="8" cy="20" r="2.4" fill="#F9A825"/><circle cx="14" cy="19" r="2.4" fill="#fff"/><circle cx="19" cy="11" r="2.4" fill="#F9A825"/><circle cx="25" cy="13" r="2.4" fill="#fff"/></svg>
+      <div><span class="brand-n">RegreLab</span><span class="brand-s">Regresión y correlación paso a paso</span></div>
+    </div>
+    <div class="top-actions">
+      <button type="button" class="top-btn" id="btn-help" aria-label="Ayuda: ver la bienvenida">❓</button>
+      <button type="button" class="top-btn" id="btn-theme" aria-label="Cambiar tema">🌙</button>
+      <button type="button" class="top-btn wide" id="btn-share">🔗<span class="lbl"> Compartir</span></button>
+      <button type="button" class="top-btn wide" id="btn-print">📄<span class="lbl"> PDF</span></button>
+    </div>
+  </header>
+
+  <nav class="nav" aria-label="Secciones de la app">
+    <button type="button" data-nav="data" aria-current="page"><span class="n-ic" aria-hidden="true">📝</span><span>Datos</span></button>
+    <button type="button" data-nav="results" aria-current="false"><span class="n-ic" aria-hidden="true">🧮</span><span>Resultados</span></button>
+    <button type="button" data-nav="graphs" aria-current="false"><span class="n-ic" aria-hidden="true">📊</span><span>Gráficos</span></button>
+    <button type="button" data-nav="learn" aria-current="false"><span class="n-ic" aria-hidden="true">🎓</span><span>Aprender</span></button>
+  </nav>
+
+  <main id="main">
+    <!-- 1. DATOS -->
+    <section id="view-data" class="view" aria-labelledby="h-data">
+      <h2 id="h-data">1. Datos</h2>
+      <p class="lead">Escribe tus pares (X, Y), pégalos desde Excel o prueba con el ejemplo del apunte. Puedes usar coma o punto decimal.</p>
+
+      <div class="card">
+        <h3>Variables <span class="opt">(opcional)</span></h3>
+        <p class="small">Los nombres y las unidades aparecerán en todas las interpretaciones y gráficos.</p>
+        <div class="grid2">
+          <label class="field">Nombre de X<input id="xName" type="text" placeholder="Ej.: Publicidad" autocomplete="off"></label>
+          <label class="field">Unidad de X<input id="xUnit" type="text" placeholder="Ej.: millones de $" autocomplete="off"></label>
+          <label class="field">Nombre de Y<input id="yName" type="text" placeholder="Ej.: Ventas" autocomplete="off"></label>
+          <label class="field">Unidad de Y<input id="yUnit" type="text" placeholder="Ej.: millones de $" autocomplete="off"></label>
+        </div>
+        <p class="small"><strong>X</strong> es la variable que se usa para predecir; <strong>Y</strong>, la que se quiere predecir.</p>
+      </div>
+
+      <div class="card">
+        <h3>Pares de datos</h3>
+        <div class="btn-row">
+          <button type="button" class="btn primary" id="btn-example">✨ Cargar ejemplo del apunte</button>
+          <button type="button" class="btn" id="btn-paste">📋 Pegar desde Excel</button>
+          <button type="button" class="btn" id="btn-csv-in">📂 Importar CSV</button>
+          <button type="button" class="btn" id="btn-csv-out">⬇ Exportar CSV</button>
+          <button type="button" class="btn ghost" id="btn-clear">🗑 Borrar todo</button>
+          <input type="file" id="csv-file" accept=".csv,.txt,.tsv,text/csv,text/plain" hidden>
+        </div>
+        <div class="tbl-wrap data-tbl">
+          <table id="dataTable">
+            <thead><tr><th class="idx">N.º</th><th id="thX">X</th><th id="thY">Y</th><th><span class="sr-only">Eliminar</span></th></tr></thead>
+            <tbody id="dataBody"></tbody>
+          </table>
+        </div>
+        <div class="btn-row"><button type="button" class="btn" id="addRow">＋ Agregar fila</button></div>
+        <div id="validation" aria-live="polite"></div>
+      </div>
+
+      <div class="card">
+        <h3>Parámetros</h3>
+        <div class="grid2">
+          <div class="field">
+            <label for="alpha">Nivel de significancia α</label>
+            <div class="chips" id="alpha-chips">
+              <button type="button" class="chip-btn" data-v="0.01" aria-pressed="false">0,01</button>
+              <button type="button" class="chip-btn" data-v="0.05" aria-pressed="true">0,05</button>
+              <button type="button" class="chip-btn" data-v="0.1" aria-pressed="false">0,10</button>
+              <input id="alpha" type="text" inputmode="decimal" aria-label="Otro valor de α" value="0,05" autocomplete="off">
+            </div>
+          </div>
+          <div class="field">
+            <label for="conf">Nivel de confianza (%)</label>
+            <div class="chips" id="conf-chips">
+              <button type="button" class="chip-btn" data-v="90" aria-pressed="false">90</button>
+              <button type="button" class="chip-btn" data-v="95" aria-pressed="true">95</button>
+              <button type="button" class="chip-btn" data-v="99" aria-pressed="false">99</button>
+              <input id="conf" type="text" inputmode="decimal" aria-label="Otro nivel de confianza en porcentaje" value="95" autocomplete="off">
+            </div>
+          </div>
+          <label class="field">Decimales a mostrar
+            <select id="dec"><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select>
+          </label>
+          <label class="field">Valor de X para predecir
+            <input id="xPred" type="text" inputmode="decimal" placeholder="Si se deja vacío, se usa la media de X" autocomplete="off">
+          </label>
+        </div>
+        <fieldset class="field radios">
+          <legend>Tipo de prueba de hipótesis</legend>
+          <label><input type="radio" name="tail" value="two" checked> Dos colas (β₁ ≠ 0)</label>
+          <label><input type="radio" name="tail" value="right"> Cola derecha (β₁ &gt; 0)</label>
+          <label><input type="radio" name="tail" value="left"> Cola izquierda (β₁ &lt; 0)</label>
+        </fieldset>
+        <label class="check"><input type="checkbox" id="ts"> Los datos están ordenados en el tiempo <span class="small">(activa Durbin-Watson)</span></label>
+      </div>
+
+      <button type="button" class="btn primary big" id="calc">Calcular paso a paso →</button>
+    </section>
+
+    <!-- 2. RESULTADOS -->
+    <section id="view-results" class="view" hidden aria-labelledby="h-res">
+      <div class="view-head">
+        <h2 id="h-res">2. Resultados paso a paso</h2>
+        <div class="toolbar no-print">
+          <div class="seg" role="group" aria-label="Modo de visualización">
+            <button type="button" data-mode="all" aria-pressed="true">Ver todo</button>
+            <button type="button" data-mode="step" aria-pressed="false">Paso a paso</button>
+          </div>
+          <button type="button" class="btn small ghost" id="btn-open-all">Expandir todo</button>
+          <button type="button" class="btn small ghost" id="btn-close-all">Contraer todo</button>
+        </div>
+      </div>
+      <div id="results"></div>
+    </section>
+
+    <!-- 3. GRÁFICOS -->
+    <section id="view-graphs" class="view" hidden aria-labelledby="h-gr">
+      <h2 id="h-gr">3. Gráficos</h2>
+      <div id="graphs"></div>
+    </section>
+
+    <!-- 4. APRENDER -->
+    <section id="view-learn" class="view" hidden aria-labelledby="h-lr">
+      <h2 id="h-lr">4. Aprender</h2>
+      <div class="ltabs" role="tablist" aria-label="Secciones de aprendizaje">
+        <button type="button" role="tab" data-ltab="gloss" aria-selected="true">📖 Glosario</button>
+        <button type="button" role="tab" data-ltab="faq" aria-selected="false">❓ Preguntas frecuentes</button>
+        <button type="button" role="tab" data-ltab="formulas" aria-selected="false">∑ Formulario</button>
+        <button type="button" role="tab" data-ltab="care" aria-selected="false">🛡 Precauciones</button>
+      </div>
+      <div id="learn-gloss" class="ltab-panel"></div>
+      <div id="learn-faq" class="ltab-panel" hidden></div>
+      <div id="learn-formulas" class="ltab-panel" hidden></div>
+      <div id="learn-care" class="ltab-panel" hidden></div>
+      <p class="small foot">Referencia: Levine, Krehbiel y Berenson, <em>Estadística para administración</em> (4.ª ed., cap. 12). <a href="tests.html">Ver autoverificación del motor de cálculo</a>.</p>
+    </section>
+  </main>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="tip" role="tooltip"></div>
+
+  <dialog id="dlg-welcome" aria-labelledby="w-t">
+    <h2 id="w-t">¡Bienvenido a RegreLab! 👋</h2>
+    <p>Resuelve regresión lineal simple y correlación <strong>paso a paso</strong>, como en el pizarrón. Solo necesitas tres pasos:</p>
+    <ol id="welcome-steps" class="welcome"></ol>
+    <label class="check"><input type="checkbox" id="welcome-never"> No volver a mostrar</label>
+    <div class="btn-row">
+      <button type="button" class="btn primary" id="welcome-example">✨ Probar con el ejemplo</button>
+      <button type="button" class="btn" id="welcome-start">Empezar</button>
+      <button type="button" class="btn ghost" id="welcome-skip" data-close>Omitir</button>
+    </div>
+  </dialog>
+
+  <dialog id="dlg-paste" aria-labelledby="p-t">
+    <h2 id="p-t">Pegar datos desde Excel o Google Sheets</h2>
+    <p class="small">Copia dos columnas (X e Y), con o sin encabezado, y pégalas aquí. Si hay más de dos columnas, se usan las dos últimas.</p>
+    <textarea id="paste-text" rows="8" placeholder="1&#9;11&#10;2&#9;16&#10;3&#9;18"></textarea>
+    <div class="btn-row"><button type="button" class="btn primary" id="paste-ok">Cargar datos</button><button type="button" class="btn ghost" data-close>Cancelar</button></div>
+  </dialog>
+
+  <dialog id="dlg-share" aria-labelledby="s-t">
+    <h2 id="s-t">Compartir este ejercicio</h2>
+    <p class="small">Quien abra el enlace verá exactamente el mismo ejercicio resuelto. Los datos viajan dentro del enlace: no se guardan en ningún servidor.</p>
+    <label class="field">Enlace<input id="share-link" type="text" readonly onfocus="this.select()"></label>
+    <div class="btn-row">
+      <button type="button" class="btn primary" id="share-copy">📋 Copiar enlace</button>
+      <button type="button" class="btn" id="share-native">📲 Compartir…</button>
+      <button type="button" class="btn" id="share-pdf">📄 Guardar como PDF</button>
+      <button type="button" class="btn" id="share-csv">⬇ Datos en CSV</button>
+      <button type="button" class="btn ghost" data-close>Cerrar</button>
+    </div>
+  </dialog>
+
+  <script src="vendor/chart.umd.js"></script>
+  <script src="vendor/katex/katex.min.js"></script>
+  <script src="js/stats.js"></script>
+  <script src="js/format.js"></script>
+  <script src="js/content.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/steps.js"></script>
+  <script src="js/share.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>

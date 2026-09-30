@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RegreLab — Autoverificación</title>
+  <style>
+    body { font: 16px/1.5 system-ui, sans-serif; max-width: 860px; margin: 0 auto; padding: 1rem; color: #1a2233; }
+    h1 { color: #1f3864; }
+    .sum { font-size: 1.2rem; font-weight: 700; padding: .7rem 1rem; border-radius: 12px; }
+    .sum.ok { background: #eaf5eb; border: 2px solid #2e7d32; }
+    .sum.bad { background: #fdecec; border: 2px solid #c62828; }
+    table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+    th, td { padding: .4rem .6rem; border-bottom: 1px solid #d5dcea; text-align: left; }
+    th { background: #eef1f7; }
+    td.r { text-align: right; font-variant-numeric: tabular-nums; }
+    .p { color: #2e7d32; font-weight: 700; }
+    .f { color: #c62828; font-weight: 700; }
+    a { color: #1a4fa8; }
+  </style>
+</head>
+<body>
+  <h1>RegreLab — Autoverificación del motor de cálculo</h1>
+  <p>Ejemplo del apunte (X = 1…8; Y = 11, 16, 18, 19, 24, 25, 29, 28), α = 0,05. Cada valor se calcula con las distribuciones t y F implementadas en <code>js/stats.js</code> (sin tablas cargadas a mano).</p>
+  <div id="sum" class="sum"></div>
+  <table>
+    <thead><tr><th>Medida</th><th>Esperado</th><th>Obtenido</th><th>Estado</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <p><a href="index.html">← Volver a RegreLab</a></p>
+  <script src="js/stats.js"></script>
+  <script src="js/tests.js"></script>
+  <script>
+    const res = RegreTests.run();
+    const bad = res.filter(r => !r.ok).length;
+    const sum = document.getElementById('sum');
+    sum.className = 'sum ' + (bad ? 'bad' : 'ok');
+    sum.textContent = (res.length - bad) + ' de ' + res.length + ' pruebas aprobadas' + (bad ? ' — hay fallas' : ' ✓');
+    document.getElementById('rows').innerHTML = res.map(r =>
+      '<tr><td>' + r.name + '</td><td class="r">' + r.expected + '</td><td class="r">' + r.got + '</td><td class="' + (r.ok ? 'p' : 'f') + '">' + (r.ok ? 'APROBADA' : 'FALLA') + '</td></tr>').join('');
+  </script>
+</body>
+</html>
