@@ -1,4 +1,4 @@
-const CACHE = 'regrelab-v3';
+const CACHE = 'regrelab-v4';
 
 const ASSETS = [
   './',
@@ -17,6 +17,7 @@ const ASSETS = [
   'js/tests.js',
   'js/exercises.js',
   'js/practice.js',
+  'js/board.js',
   'vendor/chart.umd.js',
   'vendor/katex/katex.min.js',
   'vendor/katex/katex.min.css',

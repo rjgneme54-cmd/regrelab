@@ -9,10 +9,20 @@ const Charts = (function () {
   const live = new Set();
   const hooks = { pick: null };
 
+  // Elemento del gráfico que se está dibujando: su ámbito de estilos define los colores (el pizarrón usa un panel claro)
+  let ctxEl = null;
+
+  function withCtx(el, fn) {
+    const prev = ctxEl;
+    ctxEl = el;
+    try { return fn(); } finally { ctxEl = prev; }
+  }
+
   function theme() {
-    const cs = getComputedStyle(document.documentElement);
+    const cs = getComputedStyle(ctxEl || document.documentElement);
     const g = n => cs.getPropertyValue(n).trim();
-    return { text: g('--text'), muted: g('--muted'), grid: g('--grid'), bg: g('--card'), accent: g('--accent') };
+    const k = ctxEl && ctxEl.closest && ctxEl.closest('#board') ? 1.4 : 1;
+    return { text: g('--text'), muted: g('--muted'), grid: g('--grid'), bg: g('--card'), accent: g('--accent'), k };
   }
 
   // ---------- plugins ----------
@@ -61,9 +71,10 @@ const Charts = (function () {
         ctx.closePath(); ctx.fill();
         ctx.restore();
       });
+      const fk = opts.k || 1;
       (opts.texts || []).forEach(tx => {
         ctx.save();
-        ctx.font = tx.font || '600 12px IBM Plex Sans, system-ui, sans-serif';
+        ctx.font = (tx.font || '600 12px IBM Plex Sans, system-ui, sans-serif').replace(/(\d+(?:\.\d+)?)px/, (m, px) => (px * fk) + 'px');
         ctx.textAlign = tx.align || 'center';
         ctx.textBaseline = tx.base || 'middle';
         const px = x.getPixelForValue(tx.x) + (tx.dx || 0), py = y.getPixelForValue(tx.y) + (tx.dy || 0);
@@ -115,6 +126,7 @@ const Charts = (function () {
     const legendLabels = { color: t.text, boxWidth: o.box ? 14 : 8, usePointStyle: !o.box, padding: 10, font: { size: 12 } };
     if (o.legendFilter) legendLabels.filter = o.legendFilter;
     return {
+      font: { size: Math.round(12 * t.k) },
       responsive: true,
       maintainAspectRatio: false,
       animation: { duration: o.noAnim ? 0 : 450 },
@@ -123,9 +135,9 @@ const Charts = (function () {
       plugins: {
         bgfill: { color: t.bg },
         legend: { display: o.legend !== false, position: 'bottom', labels: legendLabels },
-        title: { display: !!o.title, text: o.title, color: t.text, font: { size: 14, weight: '700' }, padding: { bottom: 8 } },
+        title: { display: !!o.title, text: o.title, color: t.text, font: { size: Math.round(14 * t.k), weight: '700' }, padding: { bottom: 8 } },
         tooltip: o.tooltip || {},
-        ann: o.ann || {}
+        ann: Object.assign({ k: t.k }, o.ann || {})
       },
       scales: o.scales
     };
@@ -257,7 +269,7 @@ const Charts = (function () {
             const idx = hit[0].index;
             box._sel = idx;
             setTimeout(() => {
-              draw.panels(box, M, L);
+              withCtx(box, () => draw.panels(box, M, L));
               if (hooks.pick) hooks.pick(box, idx);
             }, 0);
           }
@@ -431,14 +443,14 @@ const Charts = (function () {
   function mount(el, kind, M, L, extra) {
     if (!draw[kind]) return;
     el._spec = { kind, M, L, extra };
-    draw[kind](el, M, L, extra);
+    withCtx(el, () => draw[kind](el, M, L, extra));
     if (kind !== 'panels') live.add(el);
   }
 
   function redrawAll() {
     document.querySelectorAll('[data-chart]').forEach(el => {
       if (el._spec) {
-        draw[el._spec.kind](el, el._spec.M, el._spec.L, el._spec.extra);
+        withCtx(el, () => draw[el._spec.kind](el, el._spec.M, el._spec.L, el._spec.extra));
       }
     });
   }

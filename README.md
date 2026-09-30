@@ -6,6 +6,7 @@ Creada por **Prof. Neme Gastón**. Aplicación web educativa (Estadística 2) qu
 - HTML + CSS + JavaScript puro (sin frameworks ni compilación).
 - Instalable (PWA) y con funcionamiento **sin conexión**.
 - **Modo práctica:** ejercicios con datos generados al azar en tres niveles (la recta; variación y ajuste; inferencia). El estudiante calcula a mano, la app corrige con tolerancia de redondeo, da pistas y muestra la solución paso a paso. Cada ejercicio tiene un número: el enlace «Compartir este ejercicio» (`#p=12345.2`) abre exactamente el mismo ejercicio en otro dispositivo, útil para asignarlo en clase.
+- **Modo pizarrón** (botón «Pizarrón» en «Resultados», o el ícono de cada sección): presentación a pantalla completa para proyectar en clase. Una diapositiva por paso, letra grande, pizarra oscura o fondo claro, y revelado progresivo en cada cálculo (primero la fórmula, luego el reemplazo y al final el resultado). Atajos: `→` / `Espacio` / `Re Pág` avanzan (también sirve un control remoto de presentaciones), `←` retrocede, `A` muestra todo el paso, `I` abre el índice, `T` cambia el tema, `+` y `-` cambian el tamaño, `F` pantalla completa, `Esc` sale. En pantallas táctiles se cambia deslizando.
 - **Seis ejemplos precargados** (botón «Más ejemplos»): el del apunte, pendiente negativa con prueba de cola izquierda, un valor atípico, extrapolación con serie de tiempo (Durbin-Watson), relación débil que no rechaza H₀ y una relación curva con r = 0.
 - Bibliotecas incluidas en `vendor/` (Chart.js 4.4.7 y KaTeX 0.16.11): no usa CDN.
 
@@ -28,6 +29,7 @@ regrelab/
 │   ├── icons.js        Íconos de línea (SVG)
 │   ├── exercises.js    Generador y corrector de ejercicios del modo práctica
 │   ├── practice.js     Pantalla del modo práctica
+│   ├── board.js        Modo pizarrón (presentación para proyectar)
 │   ├── ui.js           Interfaz, validaciones, navegación
 │   └── tests.js        Pruebas del ejemplo del apunte
 ├── icons/              Íconos de la app

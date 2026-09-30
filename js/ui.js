@@ -412,11 +412,12 @@ const App = (function () {
       '<div class="btn-row center"><button class="btn primary" data-go="data">Ir a «Datos»</button><button class="btn ghost" data-act="example">Cargar ejemplo del apunte</button></div></div>';
   }
 
-  function cardHTML(c) {
+  function cardHTML(c, i) {
     const st = cardState[c.id] || (cardState[c.id] = { open: true, shown: globalMode === 'step' ? 1 : c.steps.length, mode: globalMode });
     return '<article class="card rc" id="' + c.id + '" data-card="' + c.id + '">' +
       '<header class="rc-h"><button type="button" class="rc-toggle" aria-expanded="' + st.open + '" aria-controls="b-' + c.id + '">' +
       '<span class="rc-num">' + c.num + '</span><span class="rc-title">' + esc(c.title) + '</span><span class="chev" aria-hidden="true">' + Icons.svg('chev') + '</span></button>' +
+      '<button type="button" class="btn small ghost board-btn" data-board="' + (i + 1) + '" aria-label="Ver esta sección en el pizarrón" title="Ver en el pizarrón">' + Icons.svg('board') + '</button>' +
       '<button type="button" class="btn small ghost help-btn" aria-expanded="false">' + Icons.svg('help') + '¿Qué significa esto?</button></header>' +
       '<div class="help-box" hidden>' + md(c.help) + '</div>' +
       '<div class="rc-body" id="b-' + c.id + '"' + (st.open ? '' : ' hidden') + '>' +
@@ -487,7 +488,7 @@ const App = (function () {
     const dataTbl = '<div class="print-only"><h2>RegreLab — Resolución paso a paso</h2><p>' + esc(Content.author) + '</p><p>Variable X: ' + esc(L.x) + ' · Variable Y: ' + esc(L.y) + ' · α = ' + Fmt.n(S2.alpha) + ' · Confianza = ' + Fmt.pct(S2.conf, 1) + '</p>' +
       '<table class="tbl"><thead><tr><th>N.º</th><th>' + esc(L.x) + '</th><th>' + esc(L.y) + '</th></tr></thead><tbody>' +
       M.x.map((v, i) => '<tr><td>' + (i + 1) + '</td><td>' + Fmt.n(v) + '</td><td>' + Fmt.n(M.y[i]) + '</td></tr>').join('') + '</tbody></table></div>';
-    root.innerHTML = dataTbl + hero + warns + idx + cards.map(cardHTML).join('');
+    root.innerHTML = dataTbl + hero + warns + idx + cards.map((c, i) => cardHTML(c, i)).join('');
     cards.forEach(c => applyCard(c.id));
     applyTips(root);
     mountCharts(root);
@@ -711,6 +712,8 @@ const App = (function () {
         document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
         Charts.resizeAll();
       }
+      const bd = e.target.closest('[data-board]');
+      if (bd) { Board.open(+bd.dataset.board); return; }
       const md_ = e.target.closest('[data-mode]');
       if (md_) setGlobalMode(md_.dataset.mode);
       const lt = e.target.closest('[data-ltab]');
@@ -760,6 +763,7 @@ const App = (function () {
     $('#btn-example').addEventListener('click', loadExample);
     $('#btn-more-examples').addEventListener('click', () => { renderExamples(); $('#dlg-examples').showModal(); });
     $('#examples-list').addEventListener('click', e => { const b = e.target.closest('[data-ex]'); if (b) loadExampleById(+b.dataset.ex); });
+    $('#btn-board').addEventListener('click', () => Board.open());
     $('#btn-open-all').addEventListener('click', () => setAllOpen(true));
     $('#btn-close-all').addEventListener('click', () => setAllOpen(false));
     $('#btn-clear').addEventListener('click', clearAll);
@@ -832,6 +836,7 @@ const App = (function () {
 
   function init() {
     Icons.hydrate();
+    Board.init({ data: () => ({ M, S: S2, L }), mount: mountCharts, toast });
     Practice.init({ toast, copy: Share.copy, tips: applyTips, resolve: resolveExercise });
     initTheme();
     initTips();

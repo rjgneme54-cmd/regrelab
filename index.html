@@ -128,6 +128,7 @@
             <button type="button" data-mode="all" aria-pressed="true">Ver todo</button>
             <button type="button" data-mode="step" aria-pressed="false">Paso a paso</button>
           </div>
+          <button type="button" class="btn small primary" id="btn-board"><span class="ico" data-icon="board"></span>Pizarrón</button>
           <button type="button" class="btn small ghost" id="btn-open-all">Expandir todo</button>
           <button type="button" class="btn small ghost" id="btn-close-all">Contraer todo</button>
         </div>
@@ -176,6 +177,29 @@
     <button type="button" class="kb-next" data-k="next">Siguiente<span class="ico" data-icon="next"></span></button>
     <button type="button" data-k="done" aria-label="Cerrar el teclado"><span class="ico" data-icon="check"></span></button>
   </div>
+  <div id="board" class="board chalk" hidden role="dialog" aria-modal="true" aria-label="Modo pizarrón" tabindex="-1">
+    <div class="b-progress"><span id="b-bar"></span></div>
+    <header class="b-top">
+      <div class="b-crumb"><span id="b-sec"></span><span id="b-pos"></span></div>
+      <div class="b-tools">
+        <button type="button" id="b-tool-index" data-b="index" aria-expanded="false" aria-label="Índice de secciones" title="Índice (I)"><span class="ico" data-icon="list"></span></button>
+        <button type="button" data-b="smaller" aria-label="Letra más chica" title="Letra más chica (−)">A−</button>
+        <button type="button" data-b="bigger" aria-label="Letra más grande" title="Letra más grande (+)">A+</button>
+        <button type="button" data-b="theme" aria-label="Cambiar entre pizarra oscura y fondo claro" title="Pizarra / claro (T)"><span class="ico" data-icon="contrast"></span></button>
+        <button type="button" id="b-tool-full" data-b="full" aria-label="Pantalla completa" title="Pantalla completa (F)"><span class="ico" data-icon="expand"></span></button>
+        <button type="button" data-b="close" aria-label="Salir del pizarrón" title="Salir (Esc)"><span class="ico" data-icon="x"></span></button>
+      </div>
+    </header>
+    <div class="b-stage" id="b-stage"><article class="b-slide" id="b-slide"></article></div>
+    <footer class="b-nav">
+      <button type="button" class="btn" id="b-prev" data-b="prev"><span class="ico flip" data-icon="next"></span>Anterior</button>
+      <span class="b-keys"><kbd>←</kbd> <kbd>→</kbd> cambiar &nbsp;·&nbsp; <kbd>A</kbd> mostrar todo &nbsp;·&nbsp; <kbd>F</kbd> pantalla completa</span>
+      <button type="button" class="btn primary" id="b-next" data-b="next">Siguiente<span class="ico" data-icon="next"></span></button>
+    </footer>
+    <aside class="b-index" id="b-index" hidden aria-label="Índice de secciones"><h2>Secciones</h2><ol id="b-index-list"></ol></aside>
+    <p class="sr-only" id="b-live" aria-live="polite"></p>
+  </div>
+
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="tip" role="tooltip"></div>
 
@@ -231,6 +255,7 @@
   <script src="js/share.js"></script>
   <script src="js/exercises.js"></script>
   <script src="js/practice.js"></script>
+  <script src="js/board.js"></script>
   <script src="js/ui.js"></script>
 </body>
 </html>
