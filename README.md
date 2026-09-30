@@ -7,6 +7,7 @@ Creada por **Prof. Neme Gastón**. Aplicación web educativa (Estadística 2) qu
 - Instalable (PWA) y con funcionamiento **sin conexión**.
 - **Modo práctica:** ejercicios con datos generados al azar en tres niveles (la recta; variación y ajuste; inferencia). El estudiante calcula a mano, la app corrige con tolerancia de redondeo, da pistas y muestra la solución paso a paso. Cada ejercicio tiene un número: el enlace «Compartir este ejercicio» (`#p=12345.2`) abre exactamente el mismo ejercicio en otro dispositivo, útil para asignarlo en clase.
 - **Modo pizarrón** (botón «Pizarrón» en «Resultados», o el ícono de cada sección): presentación a pantalla completa para proyectar en clase. Una diapositiva por paso, letra grande, pizarra oscura o fondo claro, y revelado progresivo en cada cálculo (primero la fórmula, luego el reemplazo y al final el resultado). Atajos: `→` / `Espacio` / `Re Pág` avanzan (también sirve un control remoto de presentaciones), `←` retrocede, `A` muestra todo el paso, `I` abre el índice, `T` cambia el tema, `+` y `-` cambian el tamaño, `F` pantalla completa, `Esc` sale. En pantallas táctiles se cambia deslizando.
+- **Excluir un punto y recalcular** (tarjeta 5.15): el estudiante marca puntos, ve la recta con y sin ellos en el mismo gráfico y compara b₁, r², la prueba t y la decisión. Señala el punto más influyente y advierte que solo se debe excluir un dato con una razón concreta. Se puede llevar el cambio a la tabla de datos.
 - **Seis ejemplos precargados** (botón «Más ejemplos»): el del apunte, pendiente negativa con prueba de cola izquierda, un valor atípico, extrapolación con serie de tiempo (Durbin-Watson), relación débil que no rechaza H₀ y una relación curva con r = 0.
 - Bibliotecas incluidas en `vendor/` (Chart.js 4.4.7 y KaTeX 0.16.11): no usa CDN.
 
@@ -15,7 +16,7 @@ Creada por **Prof. Neme Gastón**. Aplicación web educativa (Estadística 2) qu
 ```
 regrelab/
 ├── index.html          Página principal
-├── tests.html          Autoverificación del motor de cálculo y del generador de ejercicios (52 pruebas)
+├── tests.html          Autoverificación del motor de cálculo y del generador de ejercicios (59 pruebas)
 ├── manifest.json       Manifiesto PWA
 ├── sw.js               Service worker (funcionamiento sin conexión)
 ├── css/styles.css
@@ -28,6 +29,7 @@ regrelab/
 │   ├── share.js        Enlace compartible, Web Share API, CSV
 │   ├── icons.js        Íconos de línea (SVG)
 │   ├── exercises.js    Generador y corrector de ejercicios del modo práctica
+│   ├── influence.js    Excluir puntos y comparar (tarjeta 5.15)
 │   ├── practice.js     Pantalla del modo práctica
 │   ├── board.js        Modo pizarrón (presentación para proyectar)
 │   ├── ui.js           Interfaz, validaciones, navegación

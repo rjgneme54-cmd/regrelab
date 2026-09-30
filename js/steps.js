@@ -417,6 +417,14 @@ const Steps = (function () {
       ]
     });
 
+    if (M.n >= 4 && !M.degenerateY) {
+      cards.push({
+        id: 's515', num: '5.15', title: 'Efecto de un punto: excluir y comparar',
+        help: 'Un punto muy alejado puede «arrastrar» la recta. Aquí puedes excluir puntos y ver cuánto cambian la pendiente, r² y la conclusión de la prueba. Sirve para detectar puntos influyentes, no para descartar datos que molestan.',
+        steps: [step('Excluir puntos y comparar', '<div class="excl" data-excl></div>')]
+      });
+    }
+
     if (M.degenerateY) {
       const na = step('No se puede calcular', warn('<p>Todos los valores de ' + Y + ' son iguales, así que no hay variación que explicar: r, r² y los estadísticos t y F quedan indefinidos. Para poder completar este análisis, ' + Y + ' debe tomar al menos dos valores distintos.</p>'));
       cards.forEach(c => { if (['s56', 's57', 's59', 's510', 's512'].indexOf(c.id) >= 0) c.steps = [na]; });

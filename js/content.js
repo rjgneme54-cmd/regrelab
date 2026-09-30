@@ -65,6 +65,7 @@ const Content = (function () {
     ['¿Por qué el IP es más ancho que el IC?', 'El IC de la media solo considera la incertidumbre de dónde está la recta ($\\sqrt{h}$). El IP para un valor individual además debe sumar la variabilidad propia de un dato individual alrededor de la recta (el «1» en $\\sqrt{1+h}$). Predecir un caso puntual es más incierto que estimar un promedio.'],
     ['¿Puedo predecir con cualquier X?', 'No. La recta solo es confiable **dentro del rango de X observado** (interpolación). Fuera de ese rango (extrapolación) no se sabe si la relación lineal se mantiene, y los intervalos además se ensanchan. La app avisa cuando el X elegido está fuera del rango.'],
     ['¿Qué significa «mínimos cuadrados»?', 'Es el método que elige, entre todas las rectas posibles, la que hace **mínima la suma de los cuadrados de los residuos** (SSE). Esa recta es la de mejor ajuste y da las fórmulas de $b_0$ y $b_1$.'],
+    ['¿Puedo eliminar un dato atípico?', 'Solo si hay una **razón concreta**: un error de carga, una medición defectuosa o un caso que no pertenece a la población que se estudia. No es válido quitar un punto solo porque «no encaja» y mejora el r². Lo recomendable es analizar los resultados **con y sin** el punto (la sección 5.15 lo hace) y contar ambos.'],
     ['¿Cuándo uso Durbin-Watson?', 'Solo cuando los datos están ordenados en el tiempo (por ejemplo, ventas mensuales). Detecta si los residuos consecutivos se parecen entre sí (autocorrelación), lo que viola el supuesto de independencia. Marca la casilla «los datos están ordenados en el tiempo» para activarlo.']
   ];
 
@@ -251,7 +252,7 @@ const Content = (function () {
       "title": "Estudio y nota, con un dato atípico",
       "tag": "Valor atípico",
       "blurb": "Diez estudiantes. Uno estudió 8 horas y sacó solo 20 puntos: un dato que no encaja con el resto.",
-      "learn": "La app avisa del residuo grande (fila 8). Con ese punto la relación no es significativa (r = 0,59). Pruébalo: borra la fila 8 y compara.",
+      "learn": "La app avisa del residuo grande (fila 8). Con ese punto la relación no es significativa (r = 0,59). Pruébalo en la sección 5.15: excluye ese punto y compara.",
       "state": {
         "xName": "Horas de estudio",
         "xUnit": "h",

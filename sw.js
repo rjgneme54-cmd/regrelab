@@ -1,4 +1,4 @@
-const CACHE = 'regrelab-v4';
+const CACHE = 'regrelab-v5';
 
 const ASSETS = [
   './',
@@ -16,6 +16,7 @@ const ASSETS = [
   'js/ui.js',
   'js/tests.js',
   'js/exercises.js',
+  'js/influence.js',
   'js/practice.js',
   'js/board.js',
   'vendor/chart.umd.js',

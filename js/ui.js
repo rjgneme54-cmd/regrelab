@@ -397,7 +397,20 @@ const App = (function () {
   }
 
   // ---------- resultados ----------
+  // Quita de la tabla de datos los puntos excluidos en la tarjeta 5.15
+  function applyExclusion(excl) {
+    if (!excl.length || !V) return;
+    if (!window.confirm('¿Quitar ' + (excl.length === 1 ? 'el punto ' + (excl[0] + 1) : 'los ' + excl.length + ' puntos marcados') + ' de la tabla de datos? Podrás volver a escribirlos si te arrepientes.')) return;
+    const drop = excl.map(i => V.usedRows[i]);
+    S.rows = S.rows.filter((_, i) => drop.indexOf(i) < 0);
+    if (!S.rows.length) S.rows = blankState().rows;
+    writeForm();
+    recompute();
+    toast(excl.length === 1 ? 'Punto quitado de la tabla de datos.' : excl.length + ' puntos quitados de la tabla de datos.');
+  }
+
   function mountCharts(root) {
+    $$('[data-excl]', root).forEach(el => Influence.mount(el, M, S2, L, { apply: applyExclusion }));
     $$('[data-chart]', root).forEach(el => {
       const id = el.dataset.chart;
       if (id === 'panels') { el._sel = undefined; Charts.mount(el, 'panels', M, L); return; }

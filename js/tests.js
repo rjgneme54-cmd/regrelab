@@ -1,5 +1,6 @@
 (function (root, factory) {
-  const api = factory(typeof module === 'object' && module.exports ? require('./stats.js') : root.Stats, typeof module === 'object' && module.exports ? require('./exercises.js') : root.Exercises);
+  const isNode = typeof module === 'object' && module.exports;
+  const api = factory(isNode ? require('./stats.js') : root.Stats, isNode ? require('./exercises.js') : root.Exercises, isNode ? require('./influence.js') : root.Influence);
   if (typeof module === 'object' && module.exports) {
     module.exports = api;
     if (require.main === module) {
@@ -10,7 +11,7 @@
       process.exit(bad ? 1 : 0);
     }
   } else root.RegreTests = api;
-})(typeof self !== 'undefined' ? self : this, function (Stats, Exercises) {
+})(typeof self !== 'undefined' ? self : this, function (Stats, Exercises, Influence) {
   'use strict';
 
   const X = [1, 2, 3, 4, 5, 6, 7, 8];
@@ -94,8 +95,27 @@
     ];
   }
 
+  // Excluir puntos: dato atípico del ejemplo (X = 1…10; la fila 8 tiene Y = 20)
+  function influenceCases() {
+    const x = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], y = [35, 42, 48, 55, 60, 68, 73, 20, 85, 90];
+    const M = Stats.analyze(x, y, { alpha: 0.05, conf: 0.95, tail: 'two', xPred: 5.5 });
+    M.x = x; M.y = y;
+    const all = Influence.without(M, []);
+    const sub = Influence.without(M, [7]);
+    const infl = Influence.influence(M);
+    return [
+      ['Excluir: sin excluir nada se obtiene la misma pendiente', all.b1, M.b1, 10],
+      ['Excluir: la fila 8 es el punto más influyente', Influence.mostInfluential(M, infl), 7, 0],
+      ['Excluir la fila 8: r² sube de 0,354 a más de 0,95', sub.r2 > 0.95 && M.r2 < 0.4 ? 1 : 0, 1, 0],
+      ['Excluir la fila 8: la decisión pasa de no rechazar a rechazar H₀', !M.tSlopeTest.reject && sub.tSlopeTest.reject ? 1 : 0, 1, 0],
+      ['Excluir la fila 8: n = 9', sub.n, 9, 0],
+      ['Excluir: con menos de 3 puntos no se puede ajustar', Influence.without(M, [0, 1, 2, 3, 4, 5, 6, 7]) === null ? 1 : 0, 1, 0],
+      ['Excluir: si todas las X quedan iguales no se puede ajustar', Influence.without({ x: [1, 1, 1, 5], y: [1, 2, 3, 4], opts: M.opts, xPred: 1 }, [3]) === null ? 1 : 0, 1, 0]
+    ];
+  }
+
   function run() {
-    return cases().concat(exerciseCases()).map(c => {
+    return cases().concat(exerciseCases(), influenceCases()).map(c => {
       const tol = c[4] || 0.5 * Math.pow(10, -c[3]) + 1e-12;
       const ok = isFinite(c[1]) && Math.abs(c[1] - c[2]) <= tol;
       return { name: c[0], ok, got: isFinite(c[1]) ? fmt(c[1], Math.max(c[3], 4)) : String(c[1]), expected: fmt(c[2], c[3]) };

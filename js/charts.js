@@ -401,6 +401,29 @@ const Charts = (function () {
     });
   };
 
+  // Recta con y sin los puntos excluidos
+  draw.exclude = function (canvas, M, L, o) {
+    const t = theme();
+    const ex = (o && o.excluded) || [];
+    const sub = o && o.sub;
+    const { bx, by } = ranges(M, M.yhat.concat([M.yMin, M.yMax]));
+    const line = (m, label, color, extra) => lineDs(label, [{ x: bx.min, y: m.b0 + m.b1 * bx.min }, { x: bx.max, y: m.b0 + m.b1 * bx.max }], color, extra);
+    const keep = M.x.map((_, i) => i).filter(i => ex.indexOf(i) < 0);
+    const ds = [];
+    ds.push(sub ? line(M, 'Recta con todos los datos', t.muted, { borderWidth: 2, borderDash: [7, 5] }) : line(M, eqLabel(M), COL.ssr));
+    if (sub) ds.push(line(sub, 'Recta sin los excluidos', COL.ssr));
+    ds.push(dataset('Datos incluidos', keep.map(i => ({ x: M.x[i], y: M.y[i] })), COL.navy));
+    if (ex.length) ds.push(dataset('Puntos excluidos', ex.map(i => ({ x: M.x[i], y: M.y[i] })), COL.sse, { pointStyle: 'crossRot', pointRadius: 9, pointBorderWidth: 3, pointBorderColor: COL.sse }));
+    make(canvas, {
+      type: 'scatter',
+      data: { datasets: ds },
+      options: baseOptions(t, {
+        title: 'Efecto de excluir puntos', tooltip: ptTooltip(L),
+        scales: { x: axis(t, L.x, bx), y: axis(t, L.y, by) }
+      })
+    });
+  };
+
   // Recta con bandas de confianza y de predicción
   draw.bands = function (canvas, M, L) {
     const t = theme();
