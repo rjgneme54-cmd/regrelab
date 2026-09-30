@@ -256,6 +256,43 @@ const Steps = (function () {
       else msg = 'D es mayor que 3: hay indicios claros de <strong>autocorrelación negativa</strong>.';
       return msg;
     };
+    // Prueba formal de Durbin-Watson con d_L y d_U calculados (no tomados de una tabla)
+    function dwStep() {
+      const d = M.dw, N = M.n;
+      const head = fx(R`D=\frac{\sum_{i=2}^{n}(e_i-e_{i-1})^2}{\sum_{i=1}^{n}e_i^2}`, R`D=\frac{${tex(M.dw * M.sse)}}{${tex(M.sse)}}`, R`D=${tex(M.dw)}`);
+      const t = Stats.dwTest(d, N, 1, a);
+      if (!t) return head + interp('<p>' + dwTxt() + '</p>') + '<p class="small">Con tan pocos datos (menos de 5) no se pueden calcular los valores críticos de la prueba.</p>';
+      const alphas = [0.1, 0.05, 0.025, 0.01];
+      if (alphas.indexOf(a) < 0 && a < 0.5) alphas.push(a);
+      alphas.sort((p, q) => q - p);
+      const rows = alphas.map(al => {
+        const b = Stats.dwBounds(N, 1, al);
+        const cell = v => (al === a ? '<strong>' + v + '</strong>' : v);
+        return [cell(n(al)), cell(n(b.dL, 3)), cell(n(b.dU, 3))];
+      });
+      const say = (verdict, v, what, sign) => {
+        const vs = sign === 'neg' ? '4 − D = ' + n(v, 3) : 'D = ' + n(v, 3);
+        if (verdict === 'reject') return '<strong>Se rechaza H₀</strong>: ' + vs + ' es menor que d<sub>L</sub> = ' + n(t.dL, 3) + '. Hay evidencia de autocorrelación <strong>' + what + '</strong>.';
+        if (verdict === 'keep') return '<strong>No se rechaza H₀</strong>: ' + vs + ' supera a d<sub>U</sub> = ' + n(t.dU, 3) + '. No hay evidencia de autocorrelación ' + what + '.';
+        return '<strong>Prueba no concluyente</strong>: ' + vs + ' está entre d<sub>L</sub> = ' + n(t.dL, 3) + ' y d<sub>U</sub> = ' + n(t.dU, 3) + '.';
+      };
+      let overall;
+      if (t.positive === 'reject') overall = 'Los residuos consecutivos se parecen demasiado: hay <strong>autocorrelación positiva</strong>. El supuesto de independencia no se cumple, por lo que los errores estándar, las pruebas t y F y los intervalos no son confiables. Conviene revisar el modelo (por ejemplo, agregar una tendencia o una variable omitida).';
+      else if (t.negative === 'reject') overall = 'Los residuos consecutivos se alternan demasiado: hay <strong>autocorrelación negativa</strong>. El supuesto de independencia no se cumple y conviene revisar el modelo.';
+      else if (t.positive === 'keep' && t.negative === 'keep') overall = 'No hay evidencia de autocorrelación: el supuesto de independencia de los errores parece cumplirse.';
+      else overall = 'La prueba no permite decidir con estos datos. Mira el gráfico de residuos ordenados en el tiempo y, si es posible, consigue más observaciones.';
+      return head +
+        '<p><strong>Hipótesis</strong> (autocorrelación de los errores):</p>' + D(R`\begin{aligned}H_0&:\ \rho=0\\ H_1&:\ \rho>0\ \text{(autocorrelación positiva)}\\ H_1&:\ \rho<0\ \text{(autocorrelación negativa)}\end{aligned}`) +
+        '<p><strong>Valores críticos</strong> para n = ' + N + ' y k = 1 regresor (una cola):</p>' +
+        table(['α (una cola)', 'd<sub>L</sub>', 'd<sub>U</sub>'], rows, null, 'dw') +
+        '<p class="small">Los libros (por ejemplo, Levine) traen d<sub>L</sub> y d<sub>U</sub> solo para algunos n; aquí se calculan con la distribución exacta de los límites de Durbin-Watson, para cualquier n. En la fila resaltada está el α elegido (' + n(a) + ').</p>' +
+        '<div class="fx"><div class="fx-row"><span class="fx-cap">Regla</span>' + D(R`D<d_L:\ \text{rechazar } H_0\qquad D>d_U:\ \text{no rechazar}\qquad d_L\le D\le d_U:\ \text{no concluyente}`) + '</div>' +
+        '<div class="fx-row"><span class="fx-cap">Positiva</span><div><p>' + say(t.positive, d, 'positiva', 'pos') + '</p></div></div>' +
+        '<div class="fx-row"><span class="fx-cap">Negativa</span><div><p>' + say(t.negative, 4 - d, 'negativa', 'neg') + '</p></div></div></div>' +
+        '<div class="decision">' + overall + '</div>' +
+        '<p class="small">Para una prueba de dos colas se usa α/2 en cada cola (por ejemplo, α = 0,05 → columnas de 0,025).' + (N < 15 ? ' Con menos de 15 datos las conclusiones son poco confiables.' : '') + ' D varía entre 0 y 4: cerca de 2 indica ausencia de autocorrelación.</p>';
+    }
+
     function normalityStep() {
       const g1 = M.skew, g2 = M.exKurt;
       const notes = [];
@@ -291,8 +328,7 @@ const Steps = (function () {
           '<p>Mira el gráfico de residuos y marca lo que se cumple:</p><ul class="line-list">' + lineItems.map(it =>
             '<li><label><input type="checkbox"> <span><strong>' + it[0] + ' — ' + it[1] + '.</strong> ' + it[2] + '</span></label></li>').join('') + '</ul>'),
         step('Durbin-Watson (independencia)', S.ts
-          ? fx(R`D=\frac{\sum_{i=2}^{n}(e_i-e_{i-1})^2}{\sum_{i=1}^{n}e_i^2}`, R`D=\frac{${tex(M.dw * M.sse)}}{${tex(M.sse)}}`, R`D=${tex(M.dw)}`) +
-            interp('<p>' + dwTxt() + '</p>') + '<p class="small">D varía entre 0 y 4. Un valor cercano a 2 indica ausencia de autocorrelación.</p>'
+          ? dwStep()
           : info('<p>Esta prueba solo tiene sentido cuando los datos están <strong>ordenados en el tiempo</strong>. Si es tu caso, marca la casilla «Los datos están ordenados en el tiempo» en la pantalla «Datos».</p>'))
       ]
     });
@@ -473,7 +509,15 @@ const Steps = (function () {
       ['IC para la media (' + pct(S.conf, 0) + ')', R`\mu_{Y|X}`, '[' + n(pr.ci[0]) + ' ; ' + n(pr.ci[1]) + ']', 'Rango del promedio de ' + Y + ' para ese X.'],
       ['IP individual (' + pct(S.conf, 0) + ')', R`Y_X`, '[' + n(pr.pi[0]) + ' ; ' + n(pr.pi[1]) + ']', 'Rango para un caso individual; más ancho que el IC.']
     ];
-    if (S.ts) rows.push(['Durbin-Watson', 'D', n(M.dw), 'Cerca de 2: sin autocorrelación.']);
+    if (S.ts) {
+      const t = Stats.dwTest(M.dw, M.n, 1, S.alpha);
+      const txt = !t ? 'Con tan pocos datos no se puede aplicar la prueba.'
+        : t.positive === 'reject' ? 'D < d_L = ' + n(t.dL, 3) + ': autocorrelación positiva.'
+          : t.negative === 'reject' ? '4 − D < d_L = ' + n(t.dL, 3) + ': autocorrelación negativa.'
+            : t.positive === 'keep' && t.negative === 'keep' ? 'D > d_U = ' + n(t.dU, 3) + ': sin evidencia de autocorrelación.'
+              : 'D entre d_L = ' + n(t.dL, 3) + ' y d_U = ' + n(t.dU, 3) + ': prueba no concluyente.';
+      rows.push(['Durbin-Watson', 'D', n(M.dw), txt]);
+    }
     return rows;
   }
 

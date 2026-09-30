@@ -118,6 +118,31 @@
     ];
   }
 
+  // Durbin-Watson: valores críticos calculados frente a las tablas publicadas (Durbin-Watson, Savin-White)
+  function dwCases() {
+    const ref = [
+      [10, 1, 0.05, 0.879, 1.320, 0.0012], [15, 1, 0.05, 1.08, 1.36, 0.006], [20, 1, 0.05, 1.20, 1.41, 0.006], [25, 1, 0.05, 1.29, 1.45, 0.006],
+      [30, 1, 0.05, 1.35, 1.49, 0.006], [40, 1, 0.05, 1.44, 1.54, 0.006], [50, 1, 0.05, 1.503, 1.585, 0.0012], [100, 1, 0.05, 1.65, 1.69, 0.006],
+      [15, 1, 0.01, 0.81, 1.07, 0.006], [20, 1, 0.01, 0.95, 1.15, 0.006], [30, 1, 0.01, 1.13, 1.26, 0.006], [50, 1, 0.01, 1.32, 1.40, 0.006], [100, 1, 0.01, 1.52, 1.56, 0.006],
+      [15, 2, 0.05, 0.95, 1.54, 0.006], [20, 2, 0.05, 1.10, 1.54, 0.006], [30, 2, 0.05, 1.28, 1.57, 0.006]
+    ];
+    const out = [];
+    ref.forEach(r => {
+      const b = Stats.dwBounds(r[0], r[1], r[2]);
+      out.push(['DW n = ' + r[0] + ', k = ' + r[1] + ', α = ' + r[2] + ': d_L (tabla ' + r[3] + ')', b.dL, r[3], 3, r[5]]);
+      out.push(['DW n = ' + r[0] + ', k = ' + r[1] + ', α = ' + r[2] + ': d_U (tabla ' + r[4] + ')', b.dU, r[4], 3, r[5]]);
+    });
+    const t1 = Stats.dwTest(0.5, 20, 1, 0.05), t2 = Stats.dwTest(1.3, 20, 1, 0.05), t3 = Stats.dwTest(2.0, 20, 1, 0.05), t4 = Stats.dwTest(3.6, 20, 1, 0.05);
+    out.push(['DW: d_L < d_U siempre', Stats.dwBounds(40, 1, 0.05).dL < Stats.dwBounds(40, 1, 0.05).dU ? 1 : 0, 1, 0]);
+    out.push(['DW: al bajar α, d_L baja', Stats.dwBounds(30, 1, 0.01).dL < Stats.dwBounds(30, 1, 0.05).dL ? 1 : 0, 1, 0]);
+    out.push(['DW: D = 0,5 con n = 20 rechaza (autocorrelación positiva)', t1.positive, 'reject', 'x']);
+    out.push(['DW: D = 1,3 con n = 20 no concluye', t2.positive, 'inconclusive', 'x']);
+    out.push(['DW: D = 2,0 con n = 20 no rechaza en ninguna dirección', t3.positive + '/' + t3.negative, 'keep/keep', 'x']);
+    out.push(['DW: D = 3,6 con n = 20 rechaza la autocorrelación negativa', t4.negative, 'reject', 'x']);
+    out.push(['DW: con menos de 5 datos no hay valores críticos', Stats.dwBounds(4, 1, 0.05) === null ? 1 : 0, 1, 0]);
+    return out;
+  }
+
   // Excluir puntos: dato atípico del ejemplo (X = 1…10; la fila 8 tiene Y = 20)
   function influenceCases() {
     const x = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], y = [35, 42, 48, 55, 60, 68, 73, 20, 85, 90];
@@ -188,7 +213,7 @@
   }
 
   function run() {
-    return cases().concat(exerciseCases(), influenceCases(), assignedCases(), qrCases(), normalCases()).map(c => {
+    return cases().concat(exerciseCases(), influenceCases(), assignedCases(), qrCases(), normalCases(), dwCases()).map(c => {
       const tol = c[4] || (c[3] === 'x' ? 0 : 0.5 * Math.pow(10, -c[3]) + 1e-12);
       const ok = c[3] === 'x' ? c[1] === c[2] : isFinite(c[1]) && Math.abs(c[1] - c[2]) <= tol;
       if (c[3] === 'x') return { name: c[0], ok: c[1] === c[2], got: String(c[1]), expected: String(c[2]) };

@@ -148,6 +148,68 @@
     return p < 0.5 ? z : -z;
   }
 
+  // ---------- Durbin-Watson: valores críticos d_L y d_U ----------
+  // Con n datos y k regresores (sin contar la constante), los límites de d salen de
+  //   d_L = Σ ν_i ξ_i² / Σ ξ_i²   (i = 1 … n−k−1)      d_U = Σ ν_(i+k) ξ_i² / Σ ξ_i²
+  // con ξ_i normales estándar independientes y ν_i = 2(1 − cos(πi/n)). P(d < c) se obtiene
+  // integrando numéricamente la fórmula de Imhof para P(Σ(ν − c)ξ² < 0).
+  function imhofBelowZero(lambdas) {
+    const m = lambdas.length;
+    const f = u => {
+      let theta = 0, logRho = 0;
+      for (let j = 0; j < m; j++) {
+        const lu = lambdas[j] * u;
+        theta += Math.atan(lu);
+        logRho += Math.log(1 + lu * lu);
+      }
+      theta *= 0.5;
+      const rho = Math.exp(0.25 * logRho);
+      return u === 0 ? 0.5 * lambdas.reduce((acc, l) => acc + l, 0) : Math.sin(theta) / (u * rho);
+    };
+    // u = t/(1−t) lleva [0, ∞) a [0, 1): Simpson compuesto sobre t
+    const N = 800;
+    const g = t => {
+      if (t >= 1) return 0;
+      const u = t / (1 - t);
+      return f(u) / ((1 - t) * (1 - t));
+    };
+    let sum = g(0) + g(1 - 1e-12);
+    for (let i = 1; i < N; i++) sum += g(i / N) * (i % 2 ? 4 : 2);
+    return 0.5 - (sum / (3 * N)) / Math.PI;
+  }
+
+  const dwCache = {};
+
+  // Devuelve { dL, dU } para una cola de nivel alpha (prueba de autocorrelación positiva)
+  function dwBounds(n, k, alpha) {
+    const key = n + '|' + k + '|' + alpha;
+    if (dwCache[key]) return dwCache[key];
+    const m = n - k - 1;
+    if (!(m >= 3) || !(alpha > 0 && alpha < 0.5)) return null;
+    const nu = [];
+    for (let i = 1; i <= n - 1; i++) nu.push(2 * (1 - Math.cos(Math.PI * i / n)));
+    const solve = set => {
+      let lo = set[0], hi = set[set.length - 1];
+      for (let it = 0; it < 60; it++) {
+        const mid = 0.5 * (lo + hi);
+        if (imhofBelowZero(set.map(v => v - mid)) < alpha) lo = mid; else hi = mid;
+        if (hi - lo < 1e-9) break;
+      }
+      return 0.5 * (lo + hi);
+    };
+    const res = { dL: solve(nu.slice(0, m)), dU: solve(nu.slice(k, k + m)) };
+    dwCache[key] = res;
+    return res;
+  }
+
+  // Decisión de Durbin-Watson: autocorrelación positiva (d) y negativa (4 − d)
+  function dwTest(d, n, k, alpha) {
+    const b = dwBounds(n, k, alpha);
+    if (!b || !isFinite(d)) return null;
+    const verdict = v => (v < b.dL ? 'reject' : v > b.dU ? 'keep' : 'inconclusive');
+    return { dL: b.dL, dU: b.dU, positive: verdict(d), negative: verdict(4 - d) };
+  }
+
   // ---------- utilidades ----------
   const sum = arr => arr.reduce((s, v) => s + v, 0);
 
@@ -274,6 +336,6 @@
 
   return {
     lgamma, betai, tSfTwo, tSf, tCdf, tPdf, tUpper, tInv,
-    fSf, fCdf, fPdf, fUpper, ttest, analyze, sum, normPdf, normCdf, normInv, qqPoints
+    fSf, fCdf, fPdf, fUpper, ttest, analyze, sum, normPdf, normCdf, normInv, qqPoints, dwBounds, dwTest
   };
 });

@@ -67,7 +67,7 @@ const Content = (function () {
     ['¿Qué significa «mínimos cuadrados»?', 'Es el método que elige, entre todas las rectas posibles, la que hace **mínima la suma de los cuadrados de los residuos** (SSE). Esa recta es la de mejor ajuste y da las fórmulas de $b_0$ y $b_1$.'],
     ['¿Cómo reviso si los errores son normales?', 'Con los **residuos**: un histograma (debería parecer una campana centrada en 0) y un gráfico de probabilidad normal (los puntos deberían caer cerca de una recta). Con pocos datos los gráficos siempre se ven irregulares, así que se toman como una guía. La regresión tolera bien apartamientos leves de la normalidad; los desvíos fuertes, como una asimetría marcada o valores muy extremos, afectan sobre todo a las pruebas y los intervalos. Los gráficos están en la sección 5.8.'],
     ['¿Puedo eliminar un dato atípico?', 'Solo si hay una **razón concreta**: un error de carga, una medición defectuosa o un caso que no pertenece a la población que se estudia. No es válido quitar un punto solo porque «no encaja» y mejora el r². Lo recomendable es analizar los resultados **con y sin** el punto (la sección 5.15 lo hace) y contar ambos.'],
-    ['¿Cuándo uso Durbin-Watson?', 'Solo cuando los datos están ordenados en el tiempo (por ejemplo, ventas mensuales). Detecta si los residuos consecutivos se parecen entre sí (autocorrelación), lo que viola el supuesto de independencia. Marca la casilla «los datos están ordenados en el tiempo» para activarlo.']
+    ['¿Cuándo uso Durbin-Watson?', 'Solo cuando los datos están ordenados en el tiempo (por ejemplo, ventas mensuales). Detecta si los residuos consecutivos se parecen entre sí (autocorrelación), lo que viola el supuesto de independencia. Se compara D con dos valores críticos, $d_L$ y $d_U$: si $D<d_L$ hay autocorrelación positiva, si $D>d_U$ no hay evidencia y entre ambos la prueba no concluye. Marca la casilla «los datos están ordenados en el tiempo» para activarlo.']
   ];
 
   const formulario = [
@@ -111,7 +111,8 @@ const Content = (function () {
     ] },
     { title: 'Residuos', items: [
       ['Residuo', 'e=Y-\\hat{Y}\\qquad \\sum e=0\\qquad \\sum e^2=SSE'],
-      ['Durbin-Watson', 'D=\\dfrac{\\sum_{i=2}^{n}(e_i-e_{i-1})^2}{\\sum_{i=1}^{n}e_i^2}']
+      ['Durbin-Watson', 'D=\\dfrac{\\sum_{i=2}^{n}(e_i-e_{i-1})^2}{\\sum_{i=1}^{n}e_i^2}'],
+      ['Regla de decisión', 'D<d_L:\\ \\text{rechazar }H_0\\quad D>d_U:\\ \\text{no rechazar}\\quad d_L\\le D\\le d_U:\\ \\text{no concluyente}']
     ] }
   ];
 
@@ -314,7 +315,7 @@ const Content = (function () {
       "title": "Ventas por año: cuidado al extrapolar",
       "tag": "Extrapolación y tiempo",
       "blurb": "Ventas de 2016 a 2023 y una predicción para 2030, muy fuera del rango observado. Los datos están ordenados en el tiempo.",
-      "learn": "r² = 0,96 pero Durbin-Watson bajo (0,67): los residuos tienen un patrón y la recta no es la mejor forma. La app advierte que 2030 es extrapolación.",
+      "learn": "r² = 0,96 pero Durbin-Watson bajo (0,67), menor que d_L: la prueba detecta autocorrelación positiva y la recta no es la mejor forma. La app advierte que 2030 es extrapolación.",
       "state": {
         "xName": "Año",
         "xUnit": "",
