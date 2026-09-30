@@ -1,4 +1,4 @@
-const CACHE = 'regrelab-v1';
+const CACHE = 'regrelab-v2';
 
 const ASSETS = [
   './',
@@ -8,6 +8,7 @@ const ASSETS = [
   'css/styles.css',
   'js/stats.js',
   'js/format.js',
+  'js/icons.js',
   'js/content.js',
   'js/charts.js',
   'js/steps.js',
@@ -17,6 +18,17 @@ const ASSETS = [
   'vendor/chart.umd.js',
   'vendor/katex/katex.min.js',
   'vendor/katex/katex.min.css',
+  'vendor/fonts/newsreader-latin-wght-normal.woff2',
+  'vendor/fonts/newsreader-latin-wght-italic.woff2',
+  'vendor/fonts/ibm-plex-sans-latin-400-normal.woff2',
+  'vendor/fonts/ibm-plex-sans-latin-400-italic.woff2',
+  'vendor/fonts/ibm-plex-sans-latin-500-normal.woff2',
+  'vendor/fonts/ibm-plex-sans-latin-600-normal.woff2',
+  'vendor/fonts/ibm-plex-sans-latin-ext-400-normal.woff2',
+  'vendor/fonts/ibm-plex-sans-latin-ext-600-normal.woff2',
+  'vendor/fonts/ibm-plex-mono-latin-400-normal.woff2',
+  'vendor/fonts/ibm-plex-mono-latin-500-normal.woff2',
+  'vendor/fonts/ibm-plex-mono-latin-600-normal.woff2',
   'icons/icon.svg',
   'icons/icon-192.png',
   'icons/icon-512.png',

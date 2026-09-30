@@ -114,19 +114,19 @@ const Content = (function () {
   ];
 
   const precauciones = [
-    ['📈', 'Graficar siempre', 'Antes de calcular, mira el diagrama de dispersión. Un solo número (r, r²) puede ocultar curvas, grupos separados o datos raros que el gráfico muestra de inmediato.'],
-    ['✅', 'Verificar los supuestos', 'La recta y las pruebas de hipótesis dependen de LINE: linealidad, independencia, normalidad e igualdad de varianzas. Revisa el gráfico de residuos.'],
-    ['🚧', 'No extrapolar', 'Predecir fuera del rango de X observado es riesgoso: no hay datos que aseguren que la relación siga siendo lineal allí.'],
-    ['🔗', 'Correlación no implica causalidad', 'Que dos variables se muevan juntas no prueba que una cause a la otra. Puede haber una tercera variable o simple casualidad.'],
-    ['⚠️', 'Cuidado con los valores atípicos', 'Un solo punto muy alejado puede cambiar la pendiente y el r². Identifícalo, verifica que no sea un error de carga y analiza el resultado con y sin él.'],
-    ['🎯', 'No basarse solo en r²', 'Un r² alto no garantiza un buen modelo, ni uno bajo lo descarta. Complementa siempre con el gráfico, los residuos, S_YX y las pruebas de hipótesis.'],
-    ['🔢', 'Redondeo', 'La app calcula con precisión completa y redondea solo al mostrar. Si haces las cuentas a mano con valores ya redondeados, pueden aparecer diferencias en la última cifra decimal.']
+    ['graphs', 'Graficar siempre', 'Antes de calcular, mira el diagrama de dispersión. Un solo número (r, r²) puede ocultar curvas, grupos separados o datos raros que el gráfico muestra de inmediato.'],
+    ['check', 'Verificar los supuestos', 'La recta y las pruebas de hipótesis dependen de LINE: linealidad, independencia, normalidad e igualdad de varianzas. Revisa el gráfico de residuos.'],
+    ['road', 'No extrapolar', 'Predecir fuera del rango de X observado es riesgoso: no hay datos que aseguren que la relación siga siendo lineal allí.'],
+    ['link', 'Correlación no implica causalidad', 'Que dos variables se muevan juntas no prueba que una cause a la otra. Puede haber una tercera variable o simple casualidad.'],
+    ['warn', 'Cuidado con los valores atípicos', 'Un solo punto muy alejado puede cambiar la pendiente y el r². Identifícalo, verifica que no sea un error de carga y analiza el resultado con y sin él.'],
+    ['target', 'No basarse solo en r²', 'Un r² alto no garantiza un buen modelo, ni uno bajo lo descarta. Complementa siempre con el gráfico, los residuos, S_YX y las pruebas de hipótesis.'],
+    ['hash', 'Redondeo', 'La app calcula con precisión completa y redondea solo al mostrar. Si haces las cuentas a mano con valores ya redondeados, pueden aparecer diferencias en la última cifra decimal.']
   ];
 
   const welcome = [
-    ['📝', '1. Cargar datos', 'Escribe los pares (X, Y), pega desde Excel, importa un CSV o prueba con el ejemplo del apunte.'],
-    ['🧮', '2. Calcular', 'La app resuelve todo paso a paso: recta, variación, correlación, pruebas de hipótesis e intervalos.'],
-    ['🎓', '3. Aprender', 'Cada resultado viene explicado, con fórmulas, gráficos, glosario y preguntas frecuentes.']
+    ['', 'Cargar datos', 'Escribe los pares (X, Y), pega desde Excel, importa un CSV o prueba con el ejemplo del apunte.'],
+    ['', 'Calcular', 'La app resuelve todo paso a paso: recta, variación, correlación, pruebas de hipótesis e intervalos.'],
+    ['', 'Aprender', 'Cada resultado viene explicado, con fórmulas, gráficos, glosario y preguntas frecuentes.']
   ];
 
   const cheers = [

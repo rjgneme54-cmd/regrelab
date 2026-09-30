@@ -13,10 +13,10 @@ const Steps = (function () {
     (result ? '<div class="fx-row res"><span class="fx-cap">Resultado</span>' + D(result) + '</div>' : '') + '</div>';
 
   const step = (title, body) => '<section class="step"><h4><span>' + title + '</span></h4>' + body + '</section>';
-  const interp = html => '<div class="interp"><span class="ic" aria-hidden="true">💬</span><div><strong>Interpretación</strong>' + html + '</div></div>';
-  const warn = html => '<div class="warn"><span class="ic" aria-hidden="true">⚠️</span><div>' + html + '</div></div>';
-  const info = html => '<div class="note"><span class="ic" aria-hidden="true">ℹ️</span><div>' + html + '</div></div>';
-  const cheer = html => '<p class="cheer">🎉 ' + html + '</p>';
+  const interp = html => '<div class="interp"><div class="lab">' + Icons.svg('note') + 'Interpretación</div><div class="body">' + html + '</div></div>';
+  const warn = html => '<div class="warn"><span class="ic" aria-hidden="true">' + Icons.svg('warn') + '</span><div>' + html + '</div></div>';
+  const info = html => '<div class="note"><span class="ic" aria-hidden="true">' + Icons.svg('info') + '</span><div>' + html + '</div></div>';
+  const cheer = html => '<p class="cheer">' + Icons.svg('check') + '<span>' + html + '</span></p>';
   const chip = (cls, label) => '<span class="chip ' + cls + '">' + label + '</span>';
 
   function chartBox(id, title, after) {
@@ -24,7 +24,7 @@ const Steps = (function () {
       ? '<div class="chart-canvas panels-box" data-chart="panels"></div>'
       : '<div class="chart-canvas"><canvas data-chart="' + id + '" role="img" aria-label="' + esc(title) + '"></canvas></div>';
     return '<figure class="chartbox" data-name="regrelab-' + id + '"><figcaption><span>' + title +
-      '</span><button class="btn small ghost png-btn" type="button">⬇ PNG</button></figcaption>' + inner + (after || '') + '</figure>';
+      '</span><button class="btn small ghost png-btn" type="button">' + Icons.svg('download') + 'PNG</button></figcaption>' + inner + (after || '') + '</figure>';
   }
 
   function table(head, rows, foot, cls) {
@@ -85,7 +85,7 @@ const Steps = (function () {
 
     // 5.1 dispersión
     cards.push({
-      id: 's51', num: '5.1', icon: '📈', title: 'Diagrama de dispersión',
+      id: 's51', num: '5.1', title: 'Diagrama de dispersión',
       help: 'El diagrama de dispersión dibuja cada par (X, Y) como un punto. Sirve para ver, antes de calcular nada, si los datos siguen aproximadamente una recta y si hay puntos raros.',
       steps: [
         step('Graficar los pares (X ; Y)', '<p>Cada punto representa una observación: ' + X + ' en el eje horizontal e ' + Y + ' en el vertical.</p>' + chartBox('scatter', 'Diagrama de dispersión')),
@@ -97,7 +97,7 @@ const Steps = (function () {
     const f = v => n(v);
     const auxRows = M.x.map((v, i) => [String(i + 1), f(v), f(M.y[i]), f(v * M.y[i]), f(v * v), f(M.y[i] * M.y[i])]);
     cards.push({
-      id: 's52', num: '5.2', icon: '🧾', title: 'Tabla auxiliar de cálculo',
+      id: 's52', num: '5.2', title: 'Tabla auxiliar de cálculo',
       help: 'Para calcular a mano se arma una tabla con los productos y cuadrados de los datos. Las sumas de las columnas son los ingredientes de todas las fórmulas siguientes.',
       steps: [
         step('Armar la tabla', '<p>Se calculan las columnas <em>X·Y</em>, <em>X²</em> e <em>Y²</em> para cada fila y se suman.</p>' +
@@ -127,7 +127,7 @@ const Steps = (function () {
       D(R`${M.n}\cdot${texp(M.b0)}+${tex(M.sums.x)}\cdot${texp(M.b1)}=${tex(M.n * M.b0 + M.sums.x * M.b1)}\qquad ${tex(M.sums.x)}\cdot${texp(M.b0)}+${tex(M.sums.xx)}\cdot${texp(M.b1)}=${tex(M.sums.x * M.b0 + M.sums.xx * M.b1)}`) +
       '<p>Los lados derechos coinciden con ΣY y ΣXY: <strong>verificado</strong>.</p></div></details>';
     cards.push({
-      id: 's53', num: '5.3', icon: '📐', title: 'Método de mínimos cuadrados',
+      id: 's53', num: '5.3', title: 'Método de mínimos cuadrados',
       help: 'El método de mínimos cuadrados busca la recta que pasa «lo más cerca posible» de todos los puntos: la que hace mínima la suma de los cuadrados de las distancias verticales (los residuos). La pendiente b₁ dice cuánto cambia Y por cada unidad de X, y b₀ es donde la recta corta el eje Y.',
       steps: [
         step('Calcular las medias', fx(R`\bar{X}=\frac{\sum X}{n}\qquad \bar{Y}=\frac{\sum Y}{n}`,
@@ -159,7 +159,7 @@ const Steps = (function () {
     const extrap = !inRange(xp);
     const usedMean = S.xPredEmpty;
     cards.push({
-      id: 's54', num: '5.4', icon: '🎯', title: 'Predicción puntual',
+      id: 's54', num: '5.4', title: 'Predicción puntual',
       help: 'Predecir es reemplazar un valor de X en la ecuación de la recta para obtener el valor estimado de Y. Solo es confiable si X está dentro del rango de los datos.',
       steps: [
         step('Reemplazar X en la recta',
@@ -180,7 +180,7 @@ const Steps = (function () {
     const varRows = M.x.map((v, i) => [
       f(v), f(M.y[i]), f(M.yhat[i]), f((M.y[i] - M.ybar) ** 2), f((M.yhat[i] - M.ybar) ** 2), f((M.y[i] - M.yhat[i]) ** 2)]);
     cards.push({
-      id: 's55', num: '5.5', icon: '🧩', title: 'Medidas de variación: SST, SSR y SSE',
+      id: 's55', num: '5.5', title: 'Medidas de variación: SST, SSR y SSE',
       help: 'La variación total de Y (SST) se reparte en dos partes: la que la recta logra explicar (SSR) y la que queda sin explicar (SSE). Cuanto mayor sea SSR frente a SSE, mejor ajusta la recta.',
       steps: [
         step('Tres sumas de cuadrados, tres colores',
@@ -200,7 +200,7 @@ const Steps = (function () {
             ['', '', 'Σ', f(M.sst), f(M.ssr), f(M.sse)], 'var')),
         step('Ver la variación en tres paneles',
           '<p><strong>Toca un punto</strong> de cualquier panel para ver su descomposición: (Y − Ȳ) = (Ŷ − Ȳ) + (Y − Ŷ).</p>' +
-          chartBox('panels', 'SST, SSR y SSE', '<div class="pick-info" aria-live="polite"><span class="hint">👆 Toca un punto para ver su descomposición.</span></div>')),
+          chartBox('panels', 'SST, SSR y SSE', '<div class="pick-info" aria-live="polite"><span class="hint">Toca un punto para ver su descomposición.</span></div>')),
         step('Ver cuánto pesa cada parte', chartBox('bars', 'SST, SSR y SSE en porcentajes') +
           interp('<p>De la variación total de ' + Y + ', la recta explica <strong>' + pctS(M.ssr / M.sst) + '</strong> (SSR) y queda sin explicar <strong>' + pctS(M.sse / M.sst) + '</strong> (SSE).</p>'))
       ]
@@ -208,7 +208,7 @@ const Steps = (function () {
 
     // 5.6 r² y S_YX
     cards.push({
-      id: 's56', num: '5.6', icon: '📏', title: 'Coeficiente de determinación y error estándar',
+      id: 's56', num: '5.6', title: 'Coeficiente de determinación y error estándar',
       help: 'r² dice qué porcentaje de la variación de Y explica la recta. S_YX dice cuánto se alejan, en promedio, los valores reales de la recta, en las mismas unidades de Y.',
       steps: [
         step('Coeficiente de determinación r²', fx(R`r^2=\frac{SSR}{SST}`, R`r^2=\frac{${tex(M.ssr)}}{${tex(M.sst)}}`, R`r^2=${tex(M.r2)}\ (${pct(M.r2)})`) +
@@ -228,7 +228,7 @@ const Steps = (function () {
       '<div class="rm-zones"><span>muy fuerte</span><span>fuerte</span><span>moderada</span><span>débil</span><span>muy débil</span><span>débil</span><span>moderada</span><span>fuerte</span><span>muy fuerte</span></div>' +
       '<div class="rm-dir"><span>◀ Negativa</span><span>Positiva ▶</span></div></div>';
     cards.push({
-      id: 's57', num: '5.7', icon: '🔗', title: 'Coeficiente de correlación',
+      id: 's57', num: '5.7', title: 'Coeficiente de correlación',
       help: 'El coeficiente de correlación r mide la fuerza y la dirección de la relación lineal: cerca de +1 o −1 es una relación lineal fuerte; cerca de 0, casi nula. Su signo es el de la pendiente.',
       steps: [
         step('Calcular r', fx(R`r=\frac{SSXY}{\sqrt{SSX\cdot SST}}`, R`r=\frac{${tex(M.ssxy)}}{\sqrt{${tex(M.ssx)}\cdot ${tex(M.sst)}}}`, R`r=${tex(M.r)}`)),
@@ -263,7 +263,7 @@ const Steps = (function () {
       ['E', 'Igualdad de varianzas (homocedasticidad)', 'La dispersión vertical de los residuos debe ser parecida para todos los valores de X: sin «embudo» que se abre o se cierra.']
     ];
     cards.push({
-      id: 's58', num: '5.8', icon: '🔍', title: 'Supuestos y análisis de residuos',
+      id: 's58', num: '5.8', title: 'Supuestos y análisis de residuos',
       help: 'Los residuos (e = Y − Ŷ) son lo que la recta no logra explicar. Si el modelo es adecuado, los residuos parecen ruido al azar. Si muestran un patrón (curva, embudo), algún supuesto falla y las pruebas de hipótesis pueden no ser confiables.',
       steps: [
         step('Calcular los residuos', table(['X', 'Y', 'Ŷ', 'e = Y − Ŷ', 'e²'], resRows, ['', '', 'Σ', f(sumE), f(M.sse)], 'res') +
@@ -324,7 +324,7 @@ const Steps = (function () {
     }
 
     cards.push({
-      id: 's59', num: '5.9', icon: '🧪', title: 'Prueba t para la pendiente',
+      id: 's59', num: '5.9', title: 'Prueba t para la pendiente',
       help: 'Esta prueba responde: ¿la pendiente real β₁ es distinta de 0? Si lo fuera, X ayudaría a predecir Y. Se compara el estadístico t con un valor crítico: si cae en la zona de rechazo, se concluye que hay relación lineal.',
       steps: sixSteps('slope')
     });
@@ -334,7 +334,7 @@ const Steps = (function () {
       ? info('<p>La prueba F es siempre de cola derecha y equivale a la prueba <strong>bilateral</strong> de la pendiente (H₁: β₁ ≠ 0), aunque en la sección 5.9 hayas elegido una cola.</p>') : '';
     const fRej = M.F > M.fCrit;
     cards.push({
-      id: 's510', num: '5.10', icon: '🧮', title: 'Prueba F para la pendiente',
+      id: 's510', num: '5.10', title: 'Prueba F para la pendiente',
       help: 'La prueba F compara la variación explicada (MSR) con la no explicada (MSE). Si el cociente F es grande, la recta explica mucho más de lo esperable por azar. En regresión simple da la misma conclusión que la prueba t.',
       steps: [
         step('Plantear las hipótesis', D(R`H_0:\ \beta_1=0\qquad H_1:\ \beta_1\ne 0`) + oneTailNote),
@@ -364,7 +364,7 @@ const Steps = (function () {
     const alphaCI = 1 - conf;
     const contains0 = M.ciSlope[0] <= 0 && M.ciSlope[1] >= 0;
     cards.push({
-      id: 's511', num: '5.11', icon: '↔️', title: 'Intervalo de confianza para la pendiente',
+      id: 's511', num: '5.11', title: 'Intervalo de confianza para la pendiente',
       help: 'El intervalo de confianza da un rango de valores plausibles para la pendiente real β₁. Si el intervalo no contiene al 0, hay evidencia de relación lineal.',
       steps: [
         step('Hallar el valor crítico t', D(R`t_{\alpha/2;\,n-2}=t_{${tex(alphaCI / 2)};\,${df}}=${tex(M.tConf)}`) +
@@ -379,7 +379,7 @@ const Steps = (function () {
 
     // 5.12 prueba t correlación
     cards.push({
-      id: 's512', num: '5.12', icon: '🔬', title: 'Prueba t para el coeficiente de correlación',
+      id: 's512', num: '5.12', title: 'Prueba t para el coeficiente de correlación',
       help: 'Esta prueba responde: ¿la correlación real ρ entre X e Y es distinta de 0? En regresión simple es equivalente a probar que la pendiente es 0.',
       steps: sixSteps('r')
     });
@@ -387,7 +387,7 @@ const Steps = (function () {
     // 5.13 IC y IP
     const pr = M.pred;
     cards.push({
-      id: 's513', num: '5.13', icon: '📡', title: 'Intervalo de confianza para la media e intervalo de predicción',
+      id: 's513', num: '5.13', title: 'Intervalo de confianza para la media e intervalo de predicción',
       help: 'Ambos intervalos rodean la predicción Ŷ. El de confianza (IC) estima el promedio de Y para todos los casos con ese X. El de predicción (IP) estima el valor de un caso individual y por eso es más ancho.',
       steps: [
         step('Calcular h', (extrap ? warn('<p>X = ' + n(xp) + ' está fuera del rango observado: los intervalos se ensanchan y no son confiables (extrapolación).</p>') : '') +
@@ -408,12 +408,12 @@ const Steps = (function () {
 
     // 5.14 resumen
     cards.push({
-      id: 's514', num: '5.14', icon: '📋', title: 'Resumen final',
+      id: 's514', num: '5.14', title: 'Resumen final',
       help: 'Aquí se reúnen todos los resultados con una interpretación breve de cada uno. Puedes copiar la tabla o descargarla como CSV.',
       steps: [
         step('Tabla de resultados', '<div class="tbl-wrap"><table class="tbl summary" id="summary-table"><thead><tr><th>Medida</th><th>Valor</th><th>Interpretación</th></tr></thead><tbody>' +
           summary(M, S, L).map(r => '<tr><td>' + T(r[1]) + '<br><span class="small">' + r[0] + '</span></td><td class="num">' + r[2] + '</td><td>' + r[3] + '</td></tr>').join('') +
-          '</tbody></table></div><div class="btn-row"><button type="button" class="btn" data-act="copy-summary">📋 Copiar resumen</button><button type="button" class="btn ghost" data-act="csv-summary">⬇ Descargar CSV</button></div>')
+          '</tbody></table></div><div class="btn-row"><button type="button" class="btn" data-act="copy-summary">' + Icons.svg('copy') + 'Copiar resumen</button><button type="button" class="btn ghost" data-act="csv-summary">' + Icons.svg('download') + 'Descargar CSV</button></div>')
       ]
     });
 

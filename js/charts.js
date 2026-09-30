@@ -63,7 +63,7 @@ const Charts = (function () {
       });
       (opts.texts || []).forEach(tx => {
         ctx.save();
-        ctx.font = tx.font || '600 12px system-ui, sans-serif';
+        ctx.font = tx.font || '600 12px IBM Plex Sans, system-ui, sans-serif';
         ctx.textAlign = tx.align || 'center';
         ctx.textBaseline = tx.base || 'middle';
         const px = x.getPixelForValue(tx.x) + (tx.dx || 0), py = y.getPixelForValue(tx.y) + (tx.dy || 0);
@@ -80,6 +80,8 @@ const Charts = (function () {
     }
   };
 
+  Chart.defaults.font.family = "'IBM Plex Sans', system-ui, sans-serif";
+  Chart.defaults.font.size = 12;
   Chart.register(bgPlugin, annPlugin);
 
   // ---------- utilidades ----------
@@ -220,7 +222,7 @@ const Charts = (function () {
     }
     const { bx, by } = ranges(M, M.yhat.concat([M.yMin, M.yMax]));
     const meanLine = { x1: bx.min, y1: M.ybar, x2: bx.max, y2: M.ybar, color: t.muted, w: 1.5, dash: [6, 4] };
-    const meanText = { x: bx.max, y: M.ybar, text: 'Ȳ = ' + Fmt.n(M.ybar), color: t.text, align: 'right', base: 'bottom', dy: -3, font: '600 11px system-ui, sans-serif' };
+    const meanText = { x: bx.max, y: M.ybar, text: 'Ȳ = ' + Fmt.n(M.ybar), color: t.text, align: 'right', base: 'bottom', dy: -3, font: '600 11px IBM Plex Sans, system-ui, sans-serif' };
     const specs = [
       { title: 'SST = Σ(Y − Ȳ)² = ' + Fmt.n(M.sst), color: COL.sst, from: M.y, to: M.x.map(() => M.ybar), showLine: false },
       { title: 'SSR = Σ(Ŷ − Ȳ)² = ' + Fmt.n(M.ssr), color: COL.ssr, from: M.yhat, to: M.x.map(() => M.ybar), showLine: true },
@@ -355,13 +357,17 @@ const Charts = (function () {
     const sIn = o.stat >= xmin && o.stat <= xmax && isFinite(o.stat);
     if (sIn) {
       lines.push({ x1: o.stat, y1: 0, x2: o.stat, y2: ymax * 0.62, color: t.text, w: 3 });
-      texts.push({ x: o.stat, y: ymax * 0.67, text: sym + ' = ' + Fmt.n(o.stat), color: t.text, bg: t.bg, font: '700 12px system-ui, sans-serif' });
+      texts.push({ x: o.stat, y: ymax * 0.67, text: sym + ' = ' + Fmt.n(o.stat), color: t.text, bg: t.bg, font: '700 12px IBM Plex Sans, system-ui, sans-serif' });
     } else if (o.stat > xmax || o.stat === Infinity) {
-      arrows.push({ x1: xmax * 0.8, y1: ymax * 0.4, x2: xmax * 0.995, y2: ymax * 0.4, color: t.text });
-      texts.push({ x: xmax * 0.8, y: ymax * 0.47, text: sym + ' = ' + Fmt.n(o.stat) + ' (fuera de la escala) →', color: t.text, align: 'right', font: '700 12px system-ui, sans-serif' });
+      const span = xmax - xmin;
+      arrows.push({ x1: xmax - span * 0.16, y1: ymax * 0.36, x2: xmax - span * 0.008, y2: ymax * 0.36, color: t.text });
+      texts.push({ x: xmax - span * 0.008, y: ymax * 0.44, text: sym + ' = ' + Fmt.n(o.stat), color: t.text, align: 'right', font: '700 12px IBM Plex Sans, system-ui, sans-serif' });
+      texts.push({ x: xmax - span * 0.008, y: ymax * 0.28, text: 'fuera de la escala', color: t.muted, align: 'right', font: '400 11px IBM Plex Sans, system-ui, sans-serif' });
     } else {
-      arrows.push({ x1: xmin * 0.8, y1: ymax * 0.4, x2: xmin * 0.995, y2: ymax * 0.4, color: t.text });
-      texts.push({ x: xmin * 0.8, y: ymax * 0.47, text: '← ' + sym + ' = ' + Fmt.n(o.stat) + ' (fuera de la escala)', color: t.text, align: 'left', font: '700 12px system-ui, sans-serif' });
+      const span = xmax - xmin;
+      arrows.push({ x1: xmin + span * 0.16, y1: ymax * 0.36, x2: xmin + span * 0.008, y2: ymax * 0.36, color: t.text });
+      texts.push({ x: xmin + span * 0.008, y: ymax * 0.44, text: sym + ' = ' + Fmt.n(o.stat), color: t.text, align: 'left', font: '700 12px IBM Plex Sans, system-ui, sans-serif' });
+      texts.push({ x: xmin + span * 0.008, y: ymax * 0.28, text: 'fuera de la escala', color: t.muted, align: 'left', font: '400 11px IBM Plex Sans, system-ui, sans-serif' });
     }
 
     make(canvas, {

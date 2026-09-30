@@ -47,7 +47,7 @@ const App = (function () {
     document.documentElement.setAttribute('data-theme', t);
     safeSet('regrelab.theme', t);
     const btn = $('#btn-theme');
-    if (btn) { btn.textContent = t === 'dark' ? '☀️' : '🌙'; btn.setAttribute('aria-label', t === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'); }
+    if (btn) { btn.innerHTML = Icons.svg(t === 'dark' ? 'sun' : 'moon'); btn.setAttribute('aria-label', t === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'); }
     const meta = $('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', t === 'dark' ? '#0f1729' : '#1F3864');
     Charts.redrawAll();
@@ -58,7 +58,7 @@ const App = (function () {
     if (!t) t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', t);
     const btn = $('#btn-theme');
-    btn.textContent = t === 'dark' ? '☀️' : '🌙';
+    btn.innerHTML = Icons.svg(t === 'dark' ? 'sun' : 'moon');
     btn.setAttribute('aria-label', t === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
     btn.addEventListener('click', () => setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
   }
@@ -115,7 +115,7 @@ const App = (function () {
       tr.innerHTML = '<td class="idx">' + (i + 1) + '</td>' +
         '<td><input class="cell" type="text" inputmode="decimal" autocomplete="off" data-r="' + i + '" data-c="0" aria-label="X, fila ' + (i + 1) + '" value="' + esc(r[0]) + '"></td>' +
         '<td><input class="cell" type="text" inputmode="decimal" autocomplete="off" data-r="' + i + '" data-c="1" aria-label="Y, fila ' + (i + 1) + '" value="' + esc(r[1]) + '"></td>' +
-        '<td><button type="button" class="icon-btn del" data-del="' + i + '" aria-label="Eliminar fila ' + (i + 1) + '" title="Eliminar fila">✕</button></td>';
+        '<td><button type="button" class="icon-btn del" data-del="' + i + '" aria-label="Eliminar fila ' + (i + 1) + '" title="Eliminar fila">' + Icons.svg('x') + '</button></td>';
       tb.appendChild(tr);
     });
     updateHeaders();
@@ -227,11 +227,11 @@ const App = (function () {
     const box = $('#validation');
     const items = [];
     if (!V) { box.innerHTML = ''; return; }
-    V.errors.forEach(e => items.push('<div class="msg err"><span class="ic">🙂</span><div>' + esc(e) + '</div></div>'));
-    V.warnings.forEach(e => items.push('<div class="msg warn-m"><span class="ic">⚠️</span><div>' + esc(e) + '</div></div>'));
-    V.notes.forEach(e => items.push('<div class="msg note-m"><span class="ic">ℹ️</span><div>' + esc(e) + '</div></div>'));
-    if (V.ok && !items.length) items.push('<div class="msg ok"><span class="ic">✅</span><div>¡Todo en orden! Datos válidos: ' + V.x.length + ' pares.</div></div>');
-    else if (V.ok) items.unshift('<div class="msg ok"><span class="ic">✅</span><div>Datos válidos: ' + V.x.length + ' pares.</div></div>');
+    V.errors.forEach(e => items.push('<div class="msg err"><span class="ic">' + Icons.svg('info') + '</span><div>' + esc(e) + '</div></div>'));
+    V.warnings.forEach(e => items.push('<div class="msg warn-m"><span class="ic">' + Icons.svg('warn') + '</span><div>' + esc(e) + '</div></div>'));
+    V.notes.forEach(e => items.push('<div class="msg note-m"><span class="ic">' + Icons.svg('info') + '</span><div>' + esc(e) + '</div></div>'));
+    if (V.ok && !items.length) items.push('<div class="msg ok"><span class="ic">' + Icons.svg('check') + '</span><div>¡Todo en orden! Datos válidos: ' + V.x.length + ' pares.</div></div>');
+    else if (V.ok) items.unshift('<div class="msg ok"><span class="ic">' + Icons.svg('check') + '</span><div>Datos válidos: ' + V.x.length + ' pares.</div></div>');
     box.innerHTML = items.join('');
   }
 
@@ -332,7 +332,7 @@ const App = (function () {
   }
 
   function emptyState() {
-    return '<div class="empty"><div class="empty-ic">🧮</div><h3>Todavía no hay resultados</h3>' +
+    return '<div class="empty"><svg viewBox="0 0 120 80" width="120" height="80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 8v62h100"/><path d="M24 58L100 20" stroke-dasharray="5 5" opacity=".55"/><circle cx="30" cy="52" r="3.5" fill="currentColor"/><circle cx="48" cy="44" r="3.5" fill="currentColor"/><circle cx="64" cy="41" r="3.5" fill="currentColor"/><circle cx="82" cy="27" r="3.5" fill="currentColor"/><circle cx="98" cy="24" r="3.5" fill="currentColor"/></svg><h3>Todavía no hay resultados</h3>' +
       '<p>' + (V && V.errors.length ? esc(V.errors[0]) : 'Carga al menos 3 pares de datos (X, Y) para comenzar.') + '</p>' +
       '<div class="btn-row center"><button class="btn primary" data-go="data">Ir a «Datos»</button><button class="btn ghost" data-act="example">Cargar ejemplo del apunte</button></div></div>';
   }
@@ -341,13 +341,13 @@ const App = (function () {
     const st = cardState[c.id] || (cardState[c.id] = { open: true, shown: globalMode === 'step' ? 1 : c.steps.length, mode: globalMode });
     return '<article class="card rc" id="' + c.id + '" data-card="' + c.id + '">' +
       '<header class="rc-h"><button type="button" class="rc-toggle" aria-expanded="' + st.open + '" aria-controls="b-' + c.id + '">' +
-      '<span class="rc-icon" aria-hidden="true">' + c.icon + '</span><span class="rc-num">' + c.num + '</span><span class="rc-title">' + esc(c.title) + '</span><span class="chev" aria-hidden="true">▾</span></button>' +
-      '<button type="button" class="btn small ghost help-btn" aria-expanded="false">¿Qué significa esto?</button></header>' +
+      '<span class="rc-num">' + c.num + '</span><span class="rc-title">' + esc(c.title) + '</span><span class="chev" aria-hidden="true">' + Icons.svg('chev') + '</span></button>' +
+      '<button type="button" class="btn small ghost help-btn" aria-expanded="false">' + Icons.svg('help') + '¿Qué significa esto?</button></header>' +
       '<div class="help-box" hidden>' + md(c.help) + '</div>' +
       '<div class="rc-body" id="b-' + c.id + '"' + (st.open ? '' : ' hidden') + '>' +
       '<div class="steps">' + c.steps.map((s, i) => s.replace('<section class="step"', '<section class="step" data-i="' + i + '"')).join('') + '</div>' +
-      '<div class="step-ctl"><span class="step-count"></span><button type="button" class="btn small" data-step="next">Siguiente paso →</button>' +
-      '<button type="button" class="btn small ghost" data-step="all">Ver todo</button><button type="button" class="btn small ghost" data-step="reset">↺ Reiniciar</button></div>' +
+      '<div class="step-ctl"><span class="step-count"></span><button type="button" class="btn small" data-step="next">Siguiente paso' + Icons.svg('next') + '</button>' +
+      '<button type="button" class="btn small ghost" data-step="all">Ver todo</button><button type="button" class="btn small ghost" data-step="reset">' + Icons.svg('reset') + 'Reiniciar</button></div>' +
       '</div></article>';
   }
 
@@ -366,11 +366,27 @@ const App = (function () {
       $('.step-count', el).textContent = 'Paso ' + Math.min(st.shown, total) + ' de ' + total;
       const nb = $('[data-step="next"]', el);
       nb.disabled = done;
-      nb.textContent = done ? '¡Listo! ✓' : 'Siguiente paso →';
+      nb.innerHTML = done ? 'Completo' + Icons.svg('check') : 'Siguiente paso' + Icons.svg('next');
       $('[data-step="all"]', el).hidden = done;
     }
     $('.rc-toggle', el).setAttribute('aria-expanded', String(st.open));
     $('.rc-body', el).hidden = !st.open;
+  }
+
+  const R_HAT = String.raw`\hat{Y}=`;
+
+  // Bosquejo de los datos y la recta para el encabezado de resultados
+  function miniPlot() {
+    const W = 210, H = 132, pl = 10, pr = 8, pt = 8, pb = 12;
+    const x0 = M.xMin, x1 = M.xMax, ys = M.y.concat(M.yhat);
+    const y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
+    const sx = v => pl + (x1 === x0 ? 0.5 : (v - x0) / (x1 - x0)) * (W - pl - pr);
+    const sy = v => H - pb - (y1 === y0 ? 0.5 : (v - y0) / (y1 - y0)) * (H - pt - pb);
+    const dots = M.x.map((v, i) => '<circle cx="' + sx(v).toFixed(1) + '" cy="' + sy(M.y[i]).toFixed(1) + '" r="3.4" fill="#F9A825" stroke="currentColor" stroke-width="1.2"/>').join('');
+    const yl = v => M.b0 + M.b1 * v;
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Bosquejo de los datos y la recta ajustada" fill="none" stroke="currentColor" stroke-linecap="round" style="color:var(--accent)">' +
+      '<path d="M' + pl + ' ' + pt + 'V' + (H - pb) + 'H' + (W - pr) + '" stroke-width="1.2" opacity=".5"/>' +
+      '<path d="M' + sx(x0).toFixed(1) + ' ' + sy(yl(x0)).toFixed(1) + 'L' + sx(x1).toFixed(1) + ' ' + sy(yl(x1)).toFixed(1) + '" stroke-width="2"/>' + dots + '</svg>';
   }
 
   function renderResults() {
@@ -383,15 +399,16 @@ const App = (function () {
       return;
     }
     const cards = Steps.build(M, S2, L);
-    const eq = 'Ŷ = ' + Fmt.n(M.b0) + (M.b1 < 0 ? ' − ' : ' + ') + Fmt.n(Math.abs(M.b1)) + ' X';
-    const cheer = Content.cheers[0];
-    const hero = '<div class="hero-res"><div class="hero-t">' + cheer + '</div><div class="hero-eq">' + esc(eq) + '</div>' +
-      '<div class="hero-chips"><span>n = ' + M.n + '</span><span>r = ' + Fmt.n(M.r) + '</span><span>r² = ' + Fmt.n(M.r2) + '</span><span>S<sub>YX</sub> = ' + Fmt.n(M.syx) + '</span></div>' +
-      '<p class="small">Recorre las tarjetas en orden: cada una explica la fórmula, el reemplazo con tus datos y qué significa el resultado. ' +
-      '<span class="round-note">Se calcula con precisión completa y se redondea solo al mostrar; a mano pueden aparecer diferencias en la última cifra.</span></p></div>';
+    const eqTex = R_HAT + Fmt.tex(M.b0) + (M.b1 < 0 ? '-' : '+') + Fmt.tex(Math.abs(M.b1)) + String.raw`\,X`;
+    const stat = (k, v) => '<div><dt>' + k + '</dt><dd>' + v + '</dd></div>';
+    const hero = '<section class="sheet"><div><p class="sheet-lab">Recta ajustada por mínimos cuadrados</p><div class="sheet-eq">' + K(eqTex, true) + '</div>' +
+      '<p class="sheet-msg">' + Icons.svg('check') + Content.cheers[0] + '</p></div>' +
+      '<div class="sheet-plot">' + miniPlot() + '</div>' +
+      '<dl class="sheet-stats">' + stat('n', M.n) + stat('r', Fmt.n(M.r)) + stat('r²', Fmt.n(M.r2)) + stat('S<sub>YX</sub>', Fmt.n(M.syx)) + '</dl>' +
+      '<p class="small sheet-note">Recorre las tarjetas en orden: cada una explica la fórmula, el reemplazo con tus datos y qué significa el resultado. Se calcula con precisión completa y se redondea solo al mostrar; a mano pueden aparecer diferencias en la última cifra.</p></section>';
     const idx = '<nav class="jump" aria-label="Ir a una sección"><span>Ir a:</span>' + cards.map(c => '<a href="#' + c.id + '" data-jump="' + c.id + '">' + c.num + '</a>').join('') + '</nav>';
     const warns = (V.warnings.length || V.notes.length)
-      ? '<div class="stack">' + V.warnings.map(w => '<div class="warn"><span class="ic">⚠️</span><div>' + esc(w) + '</div></div>').join('') + V.notes.map(w => '<div class="note"><span class="ic">ℹ️</span><div>' + esc(w) + '</div></div>').join('') + '</div>' : '';
+      ? '<div class="stack">' + V.warnings.map(w => '<div class="warn"><span class="ic">' + Icons.svg('warn') + '</span><div>' + esc(w) + '</div></div>').join('') + V.notes.map(w => '<div class="note"><span class="ic">' + Icons.svg('info') + '</span><div>' + esc(w) + '</div></div>').join('') + '</div>' : '';
     const dataTbl = '<div class="print-only"><h2>RegreLab — Resolución paso a paso</h2><p>Variable X: ' + esc(L.x) + ' · Variable Y: ' + esc(L.y) + ' · α = ' + Fmt.n(S2.alpha) + ' · Confianza = ' + Fmt.pct(S2.conf, 1) + '</p>' +
       '<table class="tbl"><thead><tr><th>N.º</th><th>' + esc(L.x) + '</th><th>' + esc(L.y) + '</th></tr></thead><tbody>' +
       M.x.map((v, i) => '<tr><td>' + (i + 1) + '</td><td>' + Fmt.n(v) + '</td><td>' + Fmt.n(M.y[i]) + '</td></tr>').join('') + '</tbody></table></div>';
@@ -437,7 +454,7 @@ const App = (function () {
       box('scatter', 'Diagrama de dispersión', '<strong>5.1</strong> Cada punto es un par (X, Y). Sirve para ver la tendencia.') +
       box('regression', 'Recta de regresión y residuos', '<strong>5.3</strong> La recta de mínimos cuadrados y los residuos (segmentos rojos).') +
       box('panels', 'SST, SSR y SSE', '<strong>5.5</strong> Violeta = SST, azul = SSR, rojo = SSE. Toca un punto para ver su descomposición.',
-        '<div class="pick-info" aria-live="polite"><span class="hint">👆 Toca un punto para ver su descomposición.</span></div>') +
+        '<div class="pick-info" aria-live="polite"><span class="hint">Toca un punto para ver su descomposición.</span></div>') +
       box('bars', 'SST, SSR y SSE en porcentajes', '<strong>5.5</strong> Cuánto pesa cada parte de la variación.') +
       box('residuals', 'Residuos frente a X', '<strong>5.8</strong> Si el modelo es adecuado, los puntos se reparten al azar alrededor de 0.') +
       (M.degenerateY ? '' :
@@ -460,7 +477,7 @@ const App = (function () {
     const sym = Content.simbolos.map(s =>
       '<div class="gl-item" data-q="' + esc((s.read + ' ' + s.mean).toLowerCase()) + '"><div class="gl-k tex">' + K(s.tex) + '</div><div><div class="small">Se lee: ' + esc(s.read) + '</div><p>' + esc(s.mean) + '</p></div></div>').join('');
     $('#learn-gloss').innerHTML =
-      '<div class="search"><label class="sr-only" for="gl-search">Buscar en el glosario</label><input id="gl-search" type="search" placeholder="🔍 Buscar sigla o símbolo…" autocomplete="off"></div>' +
+      '<div class="search"><label class="sr-only" for="gl-search">Buscar en el glosario</label><input id="gl-search" type="search" placeholder="Buscar sigla o símbolo…" autocomplete="off"></div>' +
       '<h3>Siglas</h3><div class="gl-grid">' + sig + '</div><h3>Símbolos</h3><div class="gl-grid">' + sym + '</div>' +
       '<p class="small">Tip: toca cualquier sigla subrayada en la app para ver su significado.</p>';
     $('#learn-faq').innerHTML = '<div class="faq">' + Content.faq.map((q, i) =>
@@ -469,7 +486,7 @@ const App = (function () {
       '<section class="card"><h3>' + esc(g.title) + '</h3>' + g.items.map(it =>
         '<div class="fm"><div class="fm-n">' + esc(it[0]) + '</div><div class="fm-f">' + K(it[1], true) + '</div></div>').join('') + '</section>').join('');
     $('#learn-care').innerHTML = '<div class="care-grid">' + Content.precauciones.map(c =>
-      '<div class="card care"><div class="care-i" aria-hidden="true">' + c[0] + '</div><h3>' + esc(c[1]) + '</h3><p>' + esc(c[2]) + '</p></div>').join('') + '</div>';
+      '<div class="card care"><div class="care-i" aria-hidden="true">' + Icons.svg(c[0]) + '</div><h3>' + esc(c[1]) + '</h3><p>' + esc(c[2]) + '</p></div>').join('') + '</div>';
     applyTips($('#view-learn'));
     $('#gl-search').addEventListener('input', e => {
       const q = e.target.value.trim().toLowerCase();
@@ -697,10 +714,11 @@ const App = (function () {
   }
 
   function init() {
+    Icons.hydrate();
     initTheme();
     initTips();
-    $('#welcome-steps').innerHTML = Content.welcome.map(w =>
-      '<li><span class="w-ic" aria-hidden="true">' + w[0] + '</span><div><strong>' + esc(w[1]) + '</strong><p>' + esc(w[2]) + '</p></div></li>').join('');
+    $('#welcome-steps').innerHTML = Content.welcome.map((w, i) =>
+      '<li><span class="w-ic" aria-hidden="true">' + (i + 1) + '</span><div><strong>' + esc(w[1]) + '</strong><p>' + esc(w[2]) + '</p></div></li>').join('');
     bindEvents();
 
     const shared = Share.decode(location.hash);
