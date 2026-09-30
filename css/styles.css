@@ -378,3 +378,12 @@ dialog textarea { min-height: 150px; resize: vertical; }
   .chart-canvas { height: 300px; }
   .panels-box { grid-template-columns: 1fr; }
 }
+
+/* ---------- celular: letra mínima de 16 px y blancos táctiles de 44 px ---------- */
+@media (max-width: 899px) {
+  .small, .tbl, .field, .opt, .caption, .rm-dir, .faq-a, .gl-item, .hero-chips span { font-size: 1rem; }
+  .fx-cap { font-size: .85rem; }
+  .jump a { min-height: 44px; min-width: 44px; justify-content: center; font-size: 1rem; }
+  .step-count, .btn.small { font-size: 1rem; }
+  .rm-scale, .rm-zones { font-size: .8rem; }
+}
