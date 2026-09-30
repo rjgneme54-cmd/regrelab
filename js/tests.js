@@ -1,5 +1,5 @@
 (function (root, factory) {
-  const api = factory(typeof module === 'object' && module.exports ? require('./stats.js') : root.Stats);
+  const api = factory(typeof module === 'object' && module.exports ? require('./stats.js') : root.Stats, typeof module === 'object' && module.exports ? require('./exercises.js') : root.Exercises);
   if (typeof module === 'object' && module.exports) {
     module.exports = api;
     if (require.main === module) {
@@ -10,7 +10,7 @@
       process.exit(bad ? 1 : 0);
     }
   } else root.RegreTests = api;
-})(typeof self !== 'undefined' ? self : this, function (Stats) {
+})(typeof self !== 'undefined' ? self : this, function (Stats, Exercises) {
   'use strict';
 
   const X = [1, 2, 3, 4, 5, 6, 7, 8];
@@ -59,8 +59,43 @@
     ];
   }
 
+  // Ejercicios del modo práctica: 60 semillas por nivel
+  function exerciseCases() {
+    let badCond = 0, badAccept = 0, badReject = 0, nonDet = 0, rejects = 0, keeps = 0, empty = 0, count = 0;
+    for (let level = 1; level <= 3; level++) {
+      for (let seed = 1; seed <= 60; seed++) {
+        const ex = Exercises.generate(seed, level), again = Exercises.generate(seed, level);
+        count++;
+        if (JSON.stringify(ex.x) !== JSON.stringify(again.x) || JSON.stringify(ex.y) !== JSON.stringify(again.y)) nonDet++;
+        const m = ex.m;
+        const okCond = m.ssx > 0 && m.sst > 0 && m.sse > 0 && ex.x.length >= 5 && new Set(ex.x).size === ex.x.length &&
+          ex.y.every(v => Number.isInteger(v)) && (level < 3 ? Math.abs(m.r) >= 0.8 : (seed % 3 !== 0 ? m.tSlopeTest.reject : !m.tSlopeTest.reject));
+        if (!okCond) badCond++;
+        ex.questions.forEach(q => {
+          const good = q.kind === 'dec' ? q.correct : q.correct;
+          if (Exercises.grade(q, good) !== 'ok') badAccept++;
+          if (q.kind !== 'dec') {
+            const off = q.correct + Math.max(10 * q.tol, Math.abs(q.correct) * 0.1 + 1);
+            if (Exercises.grade(q, off) !== 'bad') badReject++;
+            if (Exercises.grade(q, NaN) !== 'bad') badReject++;
+          } else if (Exercises.grade(q, q.correct === 'rej' ? 'keep' : 'rej') !== 'bad') badReject++;
+          if (Exercises.grade(q, '') !== 'empty') empty++;
+        });
+        if (level === 3) { if (m.tSlopeTest.reject) rejects++; else keeps++; }
+      }
+    }
+    return [
+      ['Ejercicios: ' + count + ' generados cumplen las condiciones de cada nivel', badCond, 0, 0],
+      ['Ejercicios: la misma semilla da el mismo ejercicio', nonDet, 0, 0],
+      ['Ejercicios: toda respuesta correcta se acepta', badAccept, 0, 0],
+      ['Ejercicios: respuestas erróneas o inválidas se rechazan', badReject, 0, 0],
+      ['Ejercicios: respuestas vacías se detectan', empty, 0, 0],
+      ['Ejercicios nivel 3: hay casos que rechazan y que no rechazan H₀', rejects > 10 && keeps > 10 ? 1 : 0, 1, 0]
+    ];
+  }
+
   function run() {
-    return cases().map(c => {
+    return cases().concat(exerciseCases()).map(c => {
       const tol = c[4] || 0.5 * Math.pow(10, -c[3]) + 1e-12;
       const ok = isFinite(c[1]) && Math.abs(c[1] - c[2]) <= tol;
       return { name: c[0], ok, got: isFinite(c[1]) ? fmt(c[1], Math.max(c[3], 4)) : String(c[1]), expected: fmt(c[2], c[3]) };

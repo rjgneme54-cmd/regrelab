@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>RegreLab</title>
+  <meta name="author" content="Prof. Neme Gastón">
   <meta name="description" content="RegreLab resuelve paso a paso regresión lineal simple y correlación: fórmulas, gráficos, pruebas de hipótesis e intervalos. Funciona sin conexión.">
   <meta name="theme-color" content="#f5f1e8">
   <link rel="manifest" href="manifest.json">
@@ -34,8 +35,9 @@
     <button type="button" data-nav="data" aria-current="page"><span class="n-ic ico" data-icon="data"></span><span class="n-num" aria-hidden="true">01</span><span class="n-t">Datos</span></button>
     <button type="button" data-nav="results" aria-current="false"><span class="n-ic ico" data-icon="results"></span><span class="n-num" aria-hidden="true">02</span><span class="n-t">Resultados</span></button>
     <button type="button" data-nav="graphs" aria-current="false"><span class="n-ic ico" data-icon="graphs"></span><span class="n-num" aria-hidden="true">03</span><span class="n-t">Gráficos</span></button>
-    <button type="button" data-nav="learn" aria-current="false"><span class="n-ic ico" data-icon="learn"></span><span class="n-num" aria-hidden="true">04</span><span class="n-t">Aprender</span></button>
-    <p class="nav-foot">Basado en Levine, Krehbiel y Berenson, <em>Estadística para administración</em>, cap. 12.</p>
+    <button type="button" data-nav="practice" aria-current="false"><span class="n-ic ico" data-icon="target"></span><span class="n-num" aria-hidden="true">04</span><span class="n-t">Práctica</span></button>
+    <button type="button" data-nav="learn" aria-current="false"><span class="n-ic ico" data-icon="learn"></span><span class="n-num" aria-hidden="true">05</span><span class="n-t">Aprender</span></button>
+    <p class="nav-foot">Creada por <strong>Prof. Neme Gastón</strong>.<br>Basada en Levine, Krehbiel y Berenson, <em>Estadística para administración</em>, cap. 12.</p>
   </nav>
 
   <main id="main">
@@ -60,6 +62,7 @@
         <h3>Pares de datos</h3>
         <div class="btn-row">
           <button type="button" class="btn primary" id="btn-example"><span class="ico" data-icon="flask"></span>Cargar ejemplo del apunte</button>
+          <button type="button" class="btn" id="btn-more-examples"><span class="ico" data-icon="data"></span>Más ejemplos</button>
           <button type="button" class="btn" id="btn-paste"><span class="ico" data-icon="paste"></span>Pegar desde Excel</button>
           <button type="button" class="btn" id="btn-csv-in"><span class="ico" data-icon="upload"></span>Importar CSV</button>
           <button type="button" class="btn" id="btn-csv-out"><span class="ico" data-icon="download"></span>Exportar CSV</button>
@@ -69,7 +72,7 @@
         <div class="tbl-wrap data-tbl">
           <table id="dataTable">
             <thead><tr><th class="idx">N.º</th><th id="thX">X</th><th id="thY">Y</th><th><span class="sr-only">Eliminar</span></th></tr></thead>
-            <tbody id="dataBody"></tbody>
+            <tbody id="dataBody" data-cells></tbody>
           </table>
         </div>
         <div class="btn-row"><button type="button" class="btn" id="addRow"><span class="ico" data-icon="plus"></span>Agregar fila</button></div>
@@ -138,9 +141,15 @@
       <div id="graphs"></div>
     </section>
 
-    <!-- 4. APRENDER -->
+    <!-- 4. PRÁCTICA -->
+    <section id="view-practice" class="view" hidden aria-labelledby="h-pr">
+      <h2 id="h-pr"><span class="kicker">04</span>Práctica</h2>
+      <div id="practice"></div>
+    </section>
+
+    <!-- 5. APRENDER -->
     <section id="view-learn" class="view" hidden aria-labelledby="h-lr">
-      <h2 id="h-lr"><span class="kicker">04</span>Aprender</h2>
+      <h2 id="h-lr"><span class="kicker">05</span>Aprender</h2>
       <div class="ltabs" role="tablist" aria-label="Secciones de aprendizaje">
         <button type="button" role="tab" data-ltab="gloss" aria-selected="true">Glosario</button>
         <button type="button" role="tab" data-ltab="faq" aria-selected="false">Preguntas frecuentes</button>
@@ -152,6 +161,7 @@
       <div id="learn-formulas" class="ltab-panel" hidden></div>
       <div id="learn-care" class="ltab-panel" hidden></div>
       <p class="small foot">Referencia: Levine, Krehbiel y Berenson, <em>Estadística para administración</em> (4.ª ed., cap. 12). <a href="tests.html">Ver autoverificación del motor de cálculo</a>.</p>
+      <p class="small author">RegreLab fue creada por <strong>Prof. Neme Gastón</strong> para el estudio de Estadística.</p>
     </section>
   </main>
 
@@ -174,12 +184,20 @@
     <h2 id="w-t">Regresión y correlación, <em>como en el pizarrón</em></h2>
     <p>RegreLab resuelve cada ejercicio <strong>paso a paso</strong>, con la fórmula, el reemplazo con tus datos y qué significa el resultado. Son tres pasos:</p>
     <ol id="welcome-steps" class="welcome"></ol>
+    <p class="small author">Creada por <strong>Prof. Neme Gastón</strong>.</p>
     <label class="check"><input type="checkbox" id="welcome-never"> No volver a mostrar</label>
     <div class="btn-row">
       <button type="button" class="btn primary" id="welcome-example"><span class="ico" data-icon="flask"></span>Probar con el ejemplo</button>
       <button type="button" class="btn" id="welcome-start">Empezar</button>
       <button type="button" class="btn ghost" id="welcome-skip" data-close>Omitir</button>
     </div>
+  </dialog>
+
+  <dialog id="dlg-examples" aria-labelledby="e-t">
+    <h2 id="e-t">Ejemplos para practicar</h2>
+    <p class="small">Cada ejemplo muestra una situación distinta. Al cargarlo se reemplazan los datos actuales.</p>
+    <ul class="ex-list" id="examples-list"></ul>
+    <div class="btn-row"><button type="button" class="btn ghost" data-close>Cerrar</button></div>
   </dialog>
 
   <dialog id="dlg-paste" aria-labelledby="p-t">
@@ -211,6 +229,8 @@
   <script src="js/charts.js"></script>
   <script src="js/steps.js"></script>
   <script src="js/share.js"></script>
+  <script src="js/exercises.js"></script>
+  <script src="js/practice.js"></script>
   <script src="js/ui.js"></script>
 </body>
 </html>

@@ -6,11 +6,7 @@ const App = (function () {
   const { esc, md, K } = Fmt;
 
   const STORE = 'regrelab.state.v1';
-  const EXAMPLE = {
-    xName: 'Publicidad', xUnit: 'millones de $', yName: 'Ventas', yUnit: 'millones de $',
-    rows: [[1, 11], [2, 16], [3, 18], [4, 19], [5, 24], [6, 25], [7, 29], [8, 28]].map(r => [String(r[0]), String(r[1])]),
-    alpha: 0.05, conf: 0.95, dec: 4, xPred: '5', tail: 'two', ts: false
-  };
+  const EXAMPLE = Content.examples[0].state;
 
   const blankState = () => ({
     xName: '', xUnit: '', yName: '', yUnit: '',
@@ -140,10 +136,13 @@ const App = (function () {
 
   // Mueve el foco entre celdas; al pasar la última crea una fila nueva
   function moveFocus(el, dir) {
-    const cells = $$('#dataBody .cell');
+    const group = el.closest('[data-cells]');
+    const cells = group ? $$('.cell', group) : [el];
     const i = cells.indexOf(el) + dir;
     if (i < 0) return;
-    if (i >= cells.length) addRow(true); else cells[i].focus();
+    if (i < cells.length) { cells[i].focus(); return; }
+    if (group && group.id === 'dataBody') addRow(true);
+    else { el.blur(); const c = $('#practice [data-p="check"]'); if (c) c.focus(); }
   }
 
   function updateHeaders() {
@@ -276,7 +275,7 @@ const App = (function () {
 
   // Teclas de ayuda sobre el teclado del celular: signo, coma y desplazamiento entre celdas
   function initKeyboardBar() {
-    const bar = $('#kbbar'), body = $('#dataBody');
+    const bar = $('#kbbar');
     const touchy = () => window.matchMedia('(pointer: coarse)').matches || (window.innerWidth < 900 && navigator.maxTouchPoints > 0);
     let hideTimer = null;
     const place = () => {
@@ -285,8 +284,8 @@ const App = (function () {
     };
     const show = () => { clearTimeout(hideTimer); place(); bar.hidden = false; document.body.classList.add('kb-open'); };
     const hide = () => { hideTimer = setTimeout(() => { bar.hidden = true; document.body.classList.remove('kb-open'); }, 120); };
-    body.addEventListener('focusin', e => { if (e.target.classList.contains('cell') && touchy()) show(); });
-    body.addEventListener('focusout', hide);
+    document.addEventListener('focusin', e => { if (e.target.classList && e.target.classList.contains('cell') && touchy()) show(); });
+    document.addEventListener('focusout', e => { if (e.target.classList && e.target.classList.contains('cell')) hide(); });
     if (window.visualViewport) { window.visualViewport.addEventListener('resize', place); window.visualViewport.addEventListener('scroll', place); }
     bar.addEventListener('pointerdown', e => e.preventDefault());
     bar.addEventListener('click', e => {
@@ -326,6 +325,7 @@ const App = (function () {
     if (name === 'results') renderResults();
     if (name === 'graphs') renderGraphs();
     if (name === 'learn') renderLearn();
+    if (name === 'practice') Practice.open();
     if (!keepScroll) window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
     requestAnimationFrame(() => Charts.resizeAll());
   }
@@ -484,7 +484,7 @@ const App = (function () {
     const idx = '<nav class="jump" aria-label="Ir a una sección"><span>Ir a:</span>' + cards.map(c => '<a href="#' + c.id + '" data-jump="' + c.id + '">' + c.num + '</a>').join('') + '</nav>';
     const warns = (V.warnings.length || V.notes.length)
       ? '<div class="stack">' + V.warnings.map(w => '<div class="warn"><span class="ic">' + Icons.svg('warn') + '</span><div>' + esc(w) + '</div></div>').join('') + V.notes.map(w => '<div class="note"><span class="ic">' + Icons.svg('info') + '</span><div>' + esc(w) + '</div></div>').join('') + '</div>' : '';
-    const dataTbl = '<div class="print-only"><h2>RegreLab — Resolución paso a paso</h2><p>Variable X: ' + esc(L.x) + ' · Variable Y: ' + esc(L.y) + ' · α = ' + Fmt.n(S2.alpha) + ' · Confianza = ' + Fmt.pct(S2.conf, 1) + '</p>' +
+    const dataTbl = '<div class="print-only"><h2>RegreLab — Resolución paso a paso</h2><p>' + esc(Content.author) + '</p><p>Variable X: ' + esc(L.x) + ' · Variable Y: ' + esc(L.y) + ' · α = ' + Fmt.n(S2.alpha) + ' · Confianza = ' + Fmt.pct(S2.conf, 1) + '</p>' +
       '<table class="tbl"><thead><tr><th>N.º</th><th>' + esc(L.x) + '</th><th>' + esc(L.y) + '</th></tr></thead><tbody>' +
       M.x.map((v, i) => '<tr><td>' + (i + 1) + '</td><td>' + Fmt.n(v) + '</td><td>' + Fmt.n(M.y[i]) + '</td></tr>').join('') + '</tbody></table></div>';
     root.innerHTML = dataTbl + hero + warns + idx + cards.map(cardHTML).join('');
@@ -580,6 +580,35 @@ const App = (function () {
     writeForm();
     recompute();
     toast('Ejemplo del apunte cargado. ¡Ahora pulsa «Calcular»!');
+  }
+
+  function renderExamples() {
+    $('#examples-list').innerHTML = Content.examples.map((e, i) =>
+      '<li class="ex-item"><div class="ex-h"><span class="ex-tag">' + esc(e.tag) + '</span><h3>' + esc(e.title) + '</h3></div><p>' + esc(e.blurb) + '</p>' +
+      '<p class="ex-learn"><strong>Qué observar.</strong> ' + esc(e.learn) + '</p>' +
+      '<button type="button" class="btn primary small" data-ex="' + i + '">' + Icons.svg('flask') + 'Cargar este ejemplo</button></li>').join('');
+  }
+
+  function loadExampleById(i) {
+    const ex = Content.examples[i];
+    S = JSON.parse(JSON.stringify(ex.state));
+    writeForm();
+    recompute();
+    $('#dlg-examples').close();
+    showView('data');
+    toast('Ejemplo cargado: ' + ex.title + '. Pulsa «Calcular».');
+  }
+
+  // Lleva un ejercicio del modo práctica a la resolución completa
+  function resolveExercise(ex) {
+    S = Object.assign(blankState(), {
+      xName: ex.xName, xUnit: ex.xUnit, yName: ex.yName, yUnit: ex.yUnit,
+      rows: ex.x.map((v, i) => [String(v), String(ex.y[i])]), alpha: 0.05, conf: 0.95, dec: 4, xPred: String(ex.xp), tail: 'two', ts: false
+    });
+    writeForm();
+    recompute();
+    showView('results');
+    toast('Resolución completa del ejercicio ' + ex.seed + '.');
   }
 
   function clearAll() {
@@ -700,8 +729,8 @@ const App = (function () {
       scheduleCompute();
     });
     body.addEventListener('focusout', () => setTimeout(refreshMarks, 0));
-    body.addEventListener('focusin', e => {
-      if (e.target.classList.contains('cell')) setTimeout(() => { try { e.target.select(); } catch (err) { /* sin selección */ } }, 0);
+    document.addEventListener('focusin', e => {
+      if (e.target.classList && e.target.classList.contains('cell')) setTimeout(() => { try { e.target.select(); } catch (err) { /* sin selección */ } }, 0);
     });
     body.addEventListener('paste', e => {
       const t = e.target;
@@ -729,6 +758,8 @@ const App = (function () {
     });
     $('#addRow').addEventListener('click', () => addRow(true));
     $('#btn-example').addEventListener('click', loadExample);
+    $('#btn-more-examples').addEventListener('click', () => { renderExamples(); $('#dlg-examples').showModal(); });
+    $('#examples-list').addEventListener('click', e => { const b = e.target.closest('[data-ex]'); if (b) loadExampleById(+b.dataset.ex); });
     $('#btn-open-all').addEventListener('click', () => setAllOpen(true));
     $('#btn-close-all').addEventListener('click', () => setAllOpen(false));
     $('#btn-clear').addEventListener('click', clearAll);
@@ -801,12 +832,14 @@ const App = (function () {
 
   function init() {
     Icons.hydrate();
+    Practice.init({ toast, copy: Share.copy, tips: applyTips, resolve: resolveExercise });
     initTheme();
     initTips();
     $('#welcome-steps').innerHTML = Content.welcome.map((w, i) =>
       '<li><span class="w-ic" aria-hidden="true">' + (i + 1) + '</span><div><strong>' + esc(w[1]) + '</strong><p>' + esc(w[2]) + '</p></div></li>').join('');
     bindEvents();
 
+    const pm = /(?:^|[#&])p=(\d+)\.([123])/.exec(location.hash);
     const shared = Share.decode(location.hash);
     let fromLink = false;
     if (shared) { S = Object.assign(blankState(), shared); fromLink = true; }
@@ -822,7 +855,11 @@ const App = (function () {
     writeForm();
     recompute();
     setLearnTab('gloss');
-    if (fromLink && M) {
+    if (pm) {
+      showView('practice');
+      Practice.open(+pm[1], +pm[2]);
+      toast('Se abrió un ejercicio compartido.');
+    } else if (fromLink && M) {
       showView('results');
       toast('Se abrió un ejercicio compartido.');
     } else {

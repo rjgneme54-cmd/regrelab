@@ -126,7 +126,358 @@ const Content = (function () {
   const welcome = [
     ['', 'Cargar datos', 'Escribe los pares (X, Y), pega desde Excel, importa un CSV o prueba con el ejemplo del apunte.'],
     ['', 'Calcular', 'La app resuelve todo paso a paso: recta, variación, correlación, pruebas de hipótesis e intervalos.'],
-    ['', 'Aprender', 'Cada resultado viene explicado, con fórmulas, gráficos, glosario y preguntas frecuentes.']
+    ['', 'Aprender', 'Cada resultado viene explicado, con fórmulas, gráficos, glosario y preguntas frecuentes. Después practica con ejercicios que la app corrige.']
+  ];
+
+  const author = 'Prof. Neme Gastón';
+
+  const examples = [
+    {
+      "id": "apunte",
+      "title": "Publicidad y ventas",
+      "tag": "El del apunte",
+      "blurb": "Ocho sucursales: cuánto se invirtió en publicidad y cuánto se vendió. Es el ejemplo del apunte y sirve para comprobar cada cálculo.",
+      "learn": "Relación positiva fuerte (r = 0,9761). Se rechaza H₀: la publicidad ayuda a explicar las ventas.",
+      "state": {
+        "xName": "Publicidad",
+        "xUnit": "millones de $",
+        "yName": "Ventas",
+        "yUnit": "millones de $",
+        "rows": [
+          [
+            "1",
+            "11"
+          ],
+          [
+            "2",
+            "16"
+          ],
+          [
+            "3",
+            "18"
+          ],
+          [
+            "4",
+            "19"
+          ],
+          [
+            "5",
+            "24"
+          ],
+          [
+            "6",
+            "25"
+          ],
+          [
+            "7",
+            "29"
+          ],
+          [
+            "8",
+            "28"
+          ]
+        ],
+        "alpha": 0.05,
+        "conf": 0.95,
+        "dec": 4,
+        "xPred": "5",
+        "tail": "two",
+        "ts": false
+      }
+    },
+    {
+      "id": "negativa",
+      "title": "Precio y demanda",
+      "tag": "Pendiente negativa",
+      "blurb": "A mayor precio, menos unidades vendidas. Se usa una prueba de cola izquierda porque se espera una relación inversa.",
+      "learn": "b₁ negativo, r cercano a −1 y decisión con H₁: β₁ < 0. Fíjate en cómo se lee la pendiente cuando es negativa.",
+      "state": {
+        "xName": "Precio",
+        "xUnit": "$",
+        "yName": "Demanda",
+        "yUnit": "unidades",
+        "rows": [
+          [
+            "10",
+            "95"
+          ],
+          [
+            "12",
+            "90"
+          ],
+          [
+            "14",
+            "84"
+          ],
+          [
+            "16",
+            "80"
+          ],
+          [
+            "18",
+            "71"
+          ],
+          [
+            "20",
+            "66"
+          ],
+          [
+            "22",
+            "62"
+          ],
+          [
+            "24",
+            "53"
+          ],
+          [
+            "26",
+            "50"
+          ],
+          [
+            "28",
+            "43"
+          ]
+        ],
+        "alpha": 0.05,
+        "conf": 0.95,
+        "dec": 4,
+        "xPred": "19",
+        "tail": "left",
+        "ts": false
+      }
+    },
+    {
+      "id": "atipico",
+      "title": "Estudio y nota, con un dato atípico",
+      "tag": "Valor atípico",
+      "blurb": "Diez estudiantes. Uno estudió 8 horas y sacó solo 20 puntos: un dato que no encaja con el resto.",
+      "learn": "La app avisa del residuo grande (fila 8). Con ese punto la relación no es significativa (r = 0,59). Pruébalo: borra la fila 8 y compara.",
+      "state": {
+        "xName": "Horas de estudio",
+        "xUnit": "h",
+        "yName": "Nota",
+        "yUnit": "puntos",
+        "rows": [
+          [
+            "1",
+            "35"
+          ],
+          [
+            "2",
+            "42"
+          ],
+          [
+            "3",
+            "48"
+          ],
+          [
+            "4",
+            "55"
+          ],
+          [
+            "5",
+            "60"
+          ],
+          [
+            "6",
+            "68"
+          ],
+          [
+            "7",
+            "73"
+          ],
+          [
+            "8",
+            "20"
+          ],
+          [
+            "9",
+            "85"
+          ],
+          [
+            "10",
+            "90"
+          ]
+        ],
+        "alpha": 0.05,
+        "conf": 0.95,
+        "dec": 4,
+        "xPred": "5,5",
+        "tail": "two",
+        "ts": false
+      }
+    },
+    {
+      "id": "extrapolacion",
+      "title": "Ventas por año: cuidado al extrapolar",
+      "tag": "Extrapolación y tiempo",
+      "blurb": "Ventas de 2016 a 2023 y una predicción para 2030, muy fuera del rango observado. Los datos están ordenados en el tiempo.",
+      "learn": "r² = 0,96 pero Durbin-Watson bajo (0,67): los residuos tienen un patrón y la recta no es la mejor forma. La app advierte que 2030 es extrapolación.",
+      "state": {
+        "xName": "Año",
+        "xUnit": "",
+        "yName": "Ventas",
+        "yUnit": "millones de $",
+        "rows": [
+          [
+            "2016",
+            "40"
+          ],
+          [
+            "2017",
+            "42"
+          ],
+          [
+            "2018",
+            "45"
+          ],
+          [
+            "2019",
+            "50"
+          ],
+          [
+            "2020",
+            "56"
+          ],
+          [
+            "2021",
+            "63"
+          ],
+          [
+            "2022",
+            "71"
+          ],
+          [
+            "2023",
+            "80"
+          ]
+        ],
+        "alpha": 0.05,
+        "conf": 0.95,
+        "dec": 4,
+        "xPred": "2030",
+        "tail": "two",
+        "ts": true
+      }
+    },
+    {
+      "id": "debil",
+      "title": "Edad y monto de compra",
+      "tag": "No se rechaza H₀",
+      "blurb": "Diez clientes: la edad casi no dice nada sobre cuánto gastan.",
+      "learn": "r ≈ 0,07 y valor-p alto: no se rechaza H₀. Recuerda: «no rechazar» no es «demostrar que no hay relación».",
+      "state": {
+        "xName": "Edad",
+        "xUnit": "años",
+        "yName": "Monto de la compra",
+        "yUnit": "cientos de $",
+        "rows": [
+          [
+            "22",
+            "48"
+          ],
+          [
+            "25",
+            "62"
+          ],
+          [
+            "31",
+            "41"
+          ],
+          [
+            "35",
+            "55"
+          ],
+          [
+            "38",
+            "70"
+          ],
+          [
+            "42",
+            "44"
+          ],
+          [
+            "47",
+            "58"
+          ],
+          [
+            "51",
+            "51"
+          ],
+          [
+            "55",
+            "66"
+          ],
+          [
+            "60",
+            "47"
+          ]
+        ],
+        "alpha": 0.05,
+        "conf": 0.95,
+        "dec": 4,
+        "xPred": "40",
+        "tail": "two",
+        "ts": false
+      }
+    },
+    {
+      "id": "curva",
+      "title": "Temperatura y consumo de energía",
+      "tag": "Relación curva, r = 0",
+      "blurb": "Se consume energía con frío (calefacción) y con calor (aire acondicionado): la relación tiene forma de U.",
+      "learn": "r = 0 exacto, pero hay una relación fuerte. El gráfico de residuos muestra la curva. Por eso hay que graficar siempre.",
+      "state": {
+        "xName": "Temperatura exterior",
+        "xUnit": "°C",
+        "yName": "Consumo de energía",
+        "yUnit": "kWh",
+        "rows": [
+          [
+            "5",
+            "17"
+          ],
+          [
+            "10",
+            "10"
+          ],
+          [
+            "15",
+            "5"
+          ],
+          [
+            "20",
+            "2"
+          ],
+          [
+            "25",
+            "1"
+          ],
+          [
+            "30",
+            "2"
+          ],
+          [
+            "35",
+            "5"
+          ],
+          [
+            "40",
+            "10"
+          ],
+          [
+            "45",
+            "17"
+          ]
+        ],
+        "alpha": 0.05,
+        "conf": 0.95,
+        "dec": 4,
+        "xPred": "25",
+        "tail": "two",
+        "ts": false
+      }
+    }
   ];
 
   const cheers = [
@@ -136,5 +487,5 @@ const Content = (function () {
     '¡Genial! Ya casi se completa la resolución.'
   ];
 
-  return { siglas, simbolos, tips, faq, formulario, precauciones, welcome, cheers };
+  return { siglas, simbolos, tips, faq, formulario, precauciones, welcome, cheers, examples, author };
 })();

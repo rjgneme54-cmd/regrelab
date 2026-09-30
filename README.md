@@ -1,10 +1,12 @@
 # RegreLab — regresión lineal simple y correlación, paso a paso
 
-Aplicación web educativa (Estadística 2) que resuelve **regresión lineal simple y correlación** mostrando cada fórmula, su reemplazo con los datos y el resultado, como en el pizarrón. Notación y enfoque: Levine, Krehbiel y Berenson, *Estadística para administración* (4.ª ed., cap. 12).
+Creada por **Prof. Neme Gastón**. Aplicación web educativa (Estadística 2) que resuelve **regresión lineal simple y correlación** mostrando cada fórmula, su reemplazo con los datos y el resultado, como en el pizarrón. Notación y enfoque: Levine, Krehbiel y Berenson, *Estadística para administración* (4.ª ed., cap. 12).
 
 - 100 % en el navegador: sin servidor, sin base de datos, sin cuentas.
 - HTML + CSS + JavaScript puro (sin frameworks ni compilación).
 - Instalable (PWA) y con funcionamiento **sin conexión**.
+- **Modo práctica:** ejercicios con datos generados al azar en tres niveles (la recta; variación y ajuste; inferencia). El estudiante calcula a mano, la app corrige con tolerancia de redondeo, da pistas y muestra la solución paso a paso. Cada ejercicio tiene un número: el enlace «Compartir este ejercicio» (`#p=12345.2`) abre exactamente el mismo ejercicio en otro dispositivo, útil para asignarlo en clase.
+- **Seis ejemplos precargados** (botón «Más ejemplos»): el del apunte, pendiente negativa con prueba de cola izquierda, un valor atípico, extrapolación con serie de tiempo (Durbin-Watson), relación débil que no rechaza H₀ y una relación curva con r = 0.
 - Bibliotecas incluidas en `vendor/` (Chart.js 4.4.7 y KaTeX 0.16.11): no usa CDN.
 
 ## Estructura
@@ -12,7 +14,7 @@ Aplicación web educativa (Estadística 2) que resuelve **regresión lineal simp
 ```
 regrelab/
 ├── index.html          Página principal
-├── tests.html          Autoverificación del motor de cálculo (45 pruebas)
+├── tests.html          Autoverificación del motor de cálculo y del generador de ejercicios (52 pruebas)
 ├── manifest.json       Manifiesto PWA
 ├── sw.js               Service worker (funcionamiento sin conexión)
 ├── css/styles.css
@@ -23,10 +25,13 @@ regrelab/
 │   ├── charts.js       Gráficos (Chart.js) y exportación a PNG
 │   ├── steps.js        Resolución paso a paso (secciones 5.1 a 5.14)
 │   ├── share.js        Enlace compartible, Web Share API, CSV
+│   ├── icons.js        Íconos de línea (SVG)
+│   ├── exercises.js    Generador y corrector de ejercicios del modo práctica
+│   ├── practice.js     Pantalla del modo práctica
 │   ├── ui.js           Interfaz, validaciones, navegación
 │   └── tests.js        Pruebas del ejemplo del apunte
 ├── icons/              Íconos de la app
-└── vendor/             Chart.js y KaTeX (con sus licencias)
+└── vendor/             Chart.js, KaTeX y tipografías Newsreader / IBM Plex (con sus licencias)
 ```
 
 ## Probar en local
@@ -92,4 +97,4 @@ El botón **Compartir** genera un enlace con los datos y parámetros codificados
 
 ## Licencias de terceros
 
-Chart.js (MIT) y KaTeX (MIT) se distribuyen dentro de `vendor/` junto con sus licencias.
+Chart.js (MIT), KaTeX (MIT) y las tipografías Newsreader e IBM Plex (SIL Open Font License) se distribuyen dentro de `vendor/` junto con sus licencias.
