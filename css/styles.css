@@ -481,3 +481,41 @@ dialog h2 em { font-style: italic; font-weight: 500; color: var(--accent); }
   #view-data .btn-row #btn-example { flex-basis: 100%; }
   #view-data .btn-row #addRow { flex-basis: 100%; }
 }
+
+/* ---------- carga de datos en el celular ---------- */
+.data-tbl input.cell.bad { border-color: var(--sse); background: var(--red-bg); box-shadow: inset 3px 0 0 var(--sse); }
+.action-bar, .kbbar { display: none; }
+.kbbar[hidden] { display: none !important; }
+@media (max-width: 899px) {
+  body.on-data { padding-bottom: calc(var(--nav-h) + 84px + env(safe-area-inset-bottom)); }
+  body.on-data .action-bar {
+    display: flex; align-items: center; justify-content: space-between; gap: .75rem; position: fixed; z-index: 44; left: 0; right: 0;
+    bottom: calc(var(--nav-h) + env(safe-area-inset-bottom)); padding: .55rem .8rem; background: var(--card); border-top: 1px solid var(--rule-2);
+    box-shadow: 0 -6px 14px -10px rgba(0, 0, 0, .35);
+  }
+  body.on-data.kb-open .action-bar { display: none; }
+  .ab-status { display: flex; align-items: center; gap: .5rem; font: 400 1rem var(--sans); color: var(--muted); min-width: 0; }
+  .ab-status.ok { color: var(--green); }
+  :root[data-theme="dark"] .ab-status.ok { color: #7fd685; }
+  .ab-status strong { font-family: var(--mono); }
+  .action-bar .btn { flex: none; }
+  body.kb-open { padding-bottom: 130px; }
+  .kbbar {
+    display: flex; position: fixed; z-index: 70; left: 0; right: 0; bottom: 0; gap: .35rem; padding: .4rem .5rem; background: var(--card-2);
+    border-top: 1px solid var(--rule-2); box-shadow: 0 -6px 14px -10px rgba(0, 0, 0, .4);
+  }
+  .kbbar button {
+    flex: 1 1 0; min-width: 44px; min-height: 46px; border: 1px solid var(--rule-2); border-radius: 6px; background: var(--card); color: var(--text);
+    font: 600 1.35rem var(--mono); display: inline-flex; align-items: center; justify-content: center; gap: .4rem; cursor: pointer; padding: 0 .3rem;
+  }
+  .kbbar button:active { background: var(--card-2); }
+  .kbbar .kb-next { flex: 2.4 1 0; font: 600 1rem var(--sans); background: var(--primary); color: #fff; border-color: var(--primary); }
+  .kbbar .flip svg { transform: scaleX(-1); }
+}
+@media (max-width: 899px) {
+  body.on-data #toast { bottom: calc(var(--nav-h) + 92px + env(safe-area-inset-bottom)); }
+  body.kb-open #toast { bottom: 76px; }
+}
+@media (max-width: 899px) {
+  body.on-data #calc { display: none; }
+}

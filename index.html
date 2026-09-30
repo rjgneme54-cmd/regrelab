@@ -155,6 +155,17 @@
     </section>
   </main>
 
+  <div class="action-bar" id="action-bar">
+    <span class="ab-status" id="ab-status" aria-live="polite"></span>
+    <button type="button" class="btn primary" id="ab-calc">Calcular<span class="ico" data-icon="next"></span></button>
+  </div>
+  <div class="kbbar" id="kbbar" hidden role="toolbar" aria-label="Ayuda para escribir números">
+    <button type="button" data-k="sign" aria-label="Cambiar signo (más o menos)">±</button>
+    <button type="button" data-k="comma" aria-label="Coma decimal">,</button>
+    <button type="button" data-k="prev" aria-label="Celda anterior"><span class="ico flip" data-icon="next"></span></button>
+    <button type="button" class="kb-next" data-k="next">Siguiente<span class="ico" data-icon="next"></span></button>
+    <button type="button" data-k="done" aria-label="Cerrar el teclado"><span class="ico" data-icon="check"></span></button>
+  </div>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="tip" role="tooltip"></div>
 
@@ -172,9 +183,9 @@
   </dialog>
 
   <dialog id="dlg-paste" aria-labelledby="p-t">
-    <h2 id="p-t">Pegar datos desde Excel o Google Sheets</h2>
-    <p class="small">Copia dos columnas (X e Y), con o sin encabezado, y pégalas aquí. Si hay más de dos columnas, se usan las dos últimas.</p>
-    <textarea id="paste-text" rows="8" placeholder="1&#9;11&#10;2&#9;16&#10;3&#9;18"></textarea>
+    <h2 id="p-t">Pegar o escribir varios pares</h2>
+    <p class="small">Pega dos columnas de Excel o Google Sheets (con o sin encabezado), o escribe un par por línea separando X e Y con un espacio, por ejemplo <strong>3 18</strong>. Si hay más de dos columnas, se usan las dos últimas.</p>
+    <textarea id="paste-text" rows="8" placeholder="1 11&#10;2 16&#10;3 18"></textarea>
     <div class="btn-row"><button type="button" class="btn primary" id="paste-ok">Cargar datos</button><button type="button" class="btn ghost" data-close>Cancelar</button></div>
   </dialog>
 

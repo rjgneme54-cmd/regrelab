@@ -113,12 +113,37 @@ const App = (function () {
     S.rows.forEach((r, i) => {
       const tr = document.createElement('tr');
       tr.innerHTML = '<td class="idx">' + (i + 1) + '</td>' +
-        '<td><input class="cell" type="text" inputmode="decimal" autocomplete="off" data-r="' + i + '" data-c="0" aria-label="X, fila ' + (i + 1) + '" value="' + esc(r[0]) + '"></td>' +
-        '<td><input class="cell" type="text" inputmode="decimal" autocomplete="off" data-r="' + i + '" data-c="1" aria-label="Y, fila ' + (i + 1) + '" value="' + esc(r[1]) + '"></td>' +
+        '<td><input class="cell" type="text" inputmode="decimal" enterkeyhint="next" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-r="' + i + '" data-c="0" aria-label="X, fila ' + (i + 1) + '" value="' + esc(r[0]) + '"></td>' +
+        '<td><input class="cell" type="text" inputmode="decimal" enterkeyhint="next" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-r="' + i + '" data-c="1" aria-label="Y, fila ' + (i + 1) + '" value="' + esc(r[1]) + '"></td>' +
         '<td><button type="button" class="icon-btn del" data-del="' + i + '" aria-label="Eliminar fila ' + (i + 1) + '" title="Eliminar fila">' + Icons.svg('x') + '</button></td>';
       tb.appendChild(tr);
     });
     updateHeaders();
+    refreshMarks();
+  }
+
+  // Marca en rojo las celdas con un valor que no es número o con la fila incompleta
+  function refreshMarks() {
+    const active = document.activeElement;
+    $$('#dataBody tr').forEach(tr => {
+      const cells = $$('.cell', tr);
+      const vals = cells.map(c => c.value.trim());
+      const here = active && tr.contains(active);
+      cells.forEach((c, k) => {
+        const v = vals[k], o = vals[1 - k];
+        const bad = (v !== '' && isNaN(numOrNaN(v))) || (v === '' && o !== '' && !here);
+        c.classList.toggle('bad', bad);
+        c.setAttribute('aria-invalid', bad ? 'true' : 'false');
+      });
+    });
+  }
+
+  // Mueve el foco entre celdas; al pasar la última crea una fila nueva
+  function moveFocus(el, dir) {
+    const cells = $$('#dataBody .cell');
+    const i = cells.indexOf(el) + dir;
+    if (i < 0) return;
+    if (i >= cells.length) addRow(true); else cells[i].focus();
   }
 
   function updateHeaders() {
@@ -207,6 +232,7 @@ const App = (function () {
     }
     dirty.results = dirty.graphs = true;
     renderValidation();
+    updateActionBar();
     updateHeaders();
     updateButtons();
     persist();
@@ -235,6 +261,54 @@ const App = (function () {
     box.innerHTML = items.join('');
   }
 
+  // Barra fija «Calcular» (celular, pantalla Datos)
+  function updateActionBar() {
+    const st = $('#ab-status'), b = $('#ab-calc');
+    if (!st || !V) return;
+    const n = V.x.length;
+    st.innerHTML = V.ok
+      ? Icons.svg('check') + '<span><strong>' + n + '</strong> pares listos</span>'
+      : Icons.svg(n < 3 && !V.errors.some(e => !/al menos 3 pares/.test(e)) ? 'info' : 'warn') +
+        '<span>' + (n < 3 && !V.errors.some(e => !/al menos 3 pares/.test(e)) ? '<strong>' + n + '</strong> de 3 pares mínimos' : 'Hay datos por corregir') + '</span>';
+    st.classList.toggle('ok', V.ok);
+    b.classList.toggle('dim', !V.ok);
+  }
+
+  // Teclas de ayuda sobre el teclado del celular: signo, coma y desplazamiento entre celdas
+  function initKeyboardBar() {
+    const bar = $('#kbbar'), body = $('#dataBody');
+    const touchy = () => window.matchMedia('(pointer: coarse)').matches || (window.innerWidth < 900 && navigator.maxTouchPoints > 0);
+    let hideTimer = null;
+    const place = () => {
+      const vv = window.visualViewport;
+      bar.style.bottom = vv ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) + 'px' : '0px';
+    };
+    const show = () => { clearTimeout(hideTimer); place(); bar.hidden = false; document.body.classList.add('kb-open'); };
+    const hide = () => { hideTimer = setTimeout(() => { bar.hidden = true; document.body.classList.remove('kb-open'); }, 120); };
+    body.addEventListener('focusin', e => { if (e.target.classList.contains('cell') && touchy()) show(); });
+    body.addEventListener('focusout', hide);
+    if (window.visualViewport) { window.visualViewport.addEventListener('resize', place); window.visualViewport.addEventListener('scroll', place); }
+    bar.addEventListener('pointerdown', e => e.preventDefault());
+    bar.addEventListener('click', e => {
+      const k = e.target.closest('[data-k]');
+      const el = document.activeElement;
+      if (!k) return;
+      if (k.dataset.k === 'done') { if (el && el.blur) el.blur(); return; }
+      if (!el || !el.classList.contains('cell')) return;
+      if (k.dataset.k === 'sign') {
+        el.value = /^[-−]/.test(el.value) ? el.value.slice(1) : '-' + el.value;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      if (k.dataset.k === 'comma') {
+        const s = el.selectionStart, f = el.selectionEnd;
+        const rest = el.value.slice(0, s) + el.value.slice(f);
+        if (!/[.,]/.test(rest)) { el.setRangeText(s === 0 || /^[-−]$/.test(rest.slice(0, s)) ? '0,' : ',', s, f, 'end'); el.dispatchEvent(new Event('input', { bubbles: true })); }
+      }
+      if (k.dataset.k === 'prev') moveFocus(el, -1);
+      if (k.dataset.k === 'next') moveFocus(el, 1);
+    });
+  }
+
   function updateButtons() {
     const ok = !!M;
     ['#btn-share', '#btn-print', '#calc'].forEach(s => { const b = $(s); if (b) b.classList.toggle('dim', !ok); });
@@ -243,6 +317,7 @@ const App = (function () {
   // ---------- navegación ----------
   function showView(name, keepScroll) {
     view = name;
+    document.body.classList.toggle('on-data', name === 'data');
     $$('.view').forEach(v => { v.hidden = v.id !== 'view-' + name; });
     $$('[data-nav]').forEach(b => {
       const on = b.dataset.nav === name;
@@ -508,6 +583,7 @@ const App = (function () {
   }
 
   function clearAll() {
+    if (S.rows.some(r => String(r[0]).trim() !== '' || String(r[1]).trim() !== '') && !window.confirm('¿Borrar todos los datos cargados?')) return;
     S = blankState();
     writeForm();
     recompute();
@@ -620,7 +696,12 @@ const App = (function () {
       const t = e.target;
       if (!t.classList.contains('cell')) return;
       S.rows[+t.dataset.r][+t.dataset.c] = t.value;
+      refreshMarks();
       scheduleCompute();
+    });
+    body.addEventListener('focusout', () => setTimeout(refreshMarks, 0));
+    body.addEventListener('focusin', e => {
+      if (e.target.classList.contains('cell')) setTimeout(() => { try { e.target.select(); } catch (err) { /* sin selección */ } }, 0);
     });
     body.addEventListener('paste', e => {
       const t = e.target;
@@ -636,10 +717,7 @@ const App = (function () {
     body.addEventListener('keydown', e => {
       if (e.key !== 'Enter' || !e.target.classList.contains('cell')) return;
       e.preventDefault();
-      const r = +e.target.dataset.r, c = +e.target.dataset.c;
-      if (c === 0) { const nx = $('input[data-r="' + r + '"][data-c="1"]', body); if (nx) nx.focus(); }
-      else if (r + 1 < S.rows.length) { const nx = $('input[data-r="' + (r + 1) + '"][data-c="0"]', body); if (nx) nx.focus(); }
-      else addRow(true);
+      moveFocus(e.target, e.shiftKey ? -1 : 1);
     });
     body.addEventListener('click', e => {
       const d = e.target.closest('[data-del]');
@@ -655,6 +733,8 @@ const App = (function () {
     $('#btn-close-all').addEventListener('click', () => setAllOpen(false));
     $('#btn-clear').addEventListener('click', clearAll);
     $('#calc').addEventListener('click', goCalc);
+    $('#ab-calc').addEventListener('click', goCalc);
+    initKeyboardBar();
     $('#btn-csv-out').addEventListener('click', () => { readParams(); Share.download('regrelab-datos.csv', Share.toCSV(S)); toast('Datos exportados a CSV.'); });
     $('#btn-csv-in').addEventListener('click', () => $('#csv-file').click());
     $('#csv-file').addEventListener('change', e => {
@@ -665,7 +745,13 @@ const App = (function () {
       rd.readAsText(file);
       e.target.value = '';
     });
-    $('#btn-paste').addEventListener('click', () => { $('#paste-text').value = ''; $('#dlg-paste').showModal(); $('#paste-text').focus(); });
+    $('#btn-paste').addEventListener('click', async () => {
+      let text = '';
+      try { text = await navigator.clipboard.readText(); } catch (err) { text = ''; }
+      const parsed = Share.parseTable(text);
+      if (parsed.rows.some(r => !isNaN(numOrNaN(r[0])) && !isNaN(numOrNaN(r[1])))) { loadTable(parsed, true); return; }
+      $('#paste-text').value = ''; $('#dlg-paste').showModal(); $('#paste-text').focus();
+    });
     $('#paste-ok').addEventListener('click', () => {
       const parsed = Share.parseTable($('#paste-text').value);
       $('#dlg-paste').close();
